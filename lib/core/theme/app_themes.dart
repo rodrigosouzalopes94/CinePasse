@@ -45,7 +45,7 @@ final ThemeData kLightTheme = ThemeData(
     foregroundColor: kTextLight,
     surfaceTintColor: Colors.transparent,
   ),
-  cardTheme: CardTheme(
+  cardTheme: CardThemeData(
     color: kBgLightLight,
     surfaceTintColor: Colors.transparent,
   ),
@@ -94,7 +94,7 @@ final ThemeData kDarkTheme = ThemeData(
     foregroundColor: kTextDark,
     surfaceTintColor: Colors.transparent,
   ),
-  cardTheme: CardTheme(
+  cardTheme: CardThemeData(
     color: kBgDarkLight,
     surfaceTintColor: Colors.transparent,
   ),
