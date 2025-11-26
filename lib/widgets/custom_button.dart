@@ -32,7 +32,7 @@ class CustomButton extends StatelessWidget {
           // 3. Efeito box-shadow/glow
           boxShadow: [
             BoxShadow(
-              color: kPrimaryColor.withOpacity(0.4),
+              color: kPrimaryColor.withValues(alpha: 0.4),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -51,7 +51,7 @@ class CustomButton extends StatelessWidget {
             ),
             foregroundColor: Colors.white,
             // Cor para quando o botão estiver desabilitado (ex: durante o loading)
-            disabledBackgroundColor: kPrimaryColor.withOpacity(0.5),
+            disabledBackgroundColor: kPrimaryColor.withValues(alpha: 0.5),
           ),
           child: isLoading
           // 6. Indicador de progresso se estiver carregando

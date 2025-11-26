@@ -1,12 +1,10 @@
-// lib/features/auth/pages/login_page.dart
-
 import 'package:flutter/material.dart';
 import 'dart:ui'; // Para o BackdropFilter
 import 'package:provider/provider.dart';
 
 import '../../../widgets/custom_button.dart';
-import '../../../widgets/themed_input_field.dart';
-import '../controllers/auth_controller.dart'; // Importa o Controller de Login
+import '../../../widgets/custom_text_field.dart'; // ✅ NOVO IMPORT
+import '../controllers/auth_controller.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -14,26 +12,36 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Acessa o Controller (listener: true, para reconstruir a UI)
     final controller = context.watch<AuthController>();
-    // Usamos 'watch' para que a tela seja reconstruída quando o estado (isLoading, errorMessage) mudar.
-
-    // 2. Acessa o Controller sem ouvir (listener: false)
-    // Usamos 'read' quando só queremos chamar métodos (como login), sem reconstruir.
     final authReader = context.read<AuthController>();
 
     final formKey = GlobalKey<FormState>();
     const String backgroundImageUrl = 'https://i.imgur.com/UftFEv9.png';
 
+    // Cores dinâmicas para o texto e plano de fundo
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    // Cor de fundo do painel de login: rgba(28, 28, 28, 0.75) ou rgba(255, 255, 255, 0.75)
+    final panelBg = isDarkMode
+        ? const Color(0xFF1C1C1C).withValues(alpha: 0.75)
+        : Colors.white.withValues(alpha: 0.75);
+
+    // Cor do texto auxiliar (cinza)
+    final auxTextColor = isDarkMode ? const Color(0xFFC4C4C4) : const Color(0xFF6B7280);
+
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Imagem de Fundo
+          // 1. Imagem de Fundo (login-screen)
           Positioned.fill(
-            child: Image.network(backgroundImageUrl, fit: BoxFit.cover),
+            child: Image.network(backgroundImageUrl, fit: BoxFit.cover,
+              // Fallback para caso a imagem falhe
+              errorBuilder: (context, error, stackTrace) => Container(color: Colors.black),
+            ),
           ),
 
-          // 2. Overlay Escuro
+          // 2. Overlay Escuro (::before)
           Positioned.fill(
             child: Container(color: Colors.black.withValues(alpha: 0.5)),
           ),
@@ -48,8 +56,8 @@ class LoginPage extends StatelessWidget {
                   _buildAppTitle(context),
                   const SizedBox(height: 40.0),
 
-                  // Painel de Login
-                  _buildLoginPanel(context, formKey, controller, authReader),
+                  // Painel de Login (login-panel)
+                  _buildLoginPanel(context, formKey, controller, authReader, panelBg, primaryColor, auxTextColor),
                 ],
               ),
             ),
@@ -60,7 +68,6 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _buildAppTitle(BuildContext context) {
-    // (Implementação do _buildAppTitle mantida em Português)
     return Column(
       children: [
         Text.rich(
@@ -70,8 +77,9 @@ class LoginPage extends StatelessWidget {
               fontSize: 48,
               fontWeight: FontWeight.w900,
               color: Theme.of(context).colorScheme.primary,
+              // Adiciona a sombra para melhor visibilidade no fundo
               shadows: [
-                Shadow(blurRadius: 15.0, color: Colors.black.withValues(alpha: 0.7)),
+                Shadow(blurRadius: 10.0, color: Colors.black.withValues(alpha: 0.8)),
               ],
             ),
             children: const [
@@ -92,25 +100,25 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _buildLoginPanel(
-    BuildContext context,
-    GlobalKey<FormState> formKey,
-    AuthController controller, // Controller que está sendo 'watched'
-    AuthController
-    authReader, // Controller que é usado apenas para chamar funções
-  ) {
-    final blurColor = Theme.of(context).cardColor.withValues(alpha: 0.75);
-
+      BuildContext context,
+      GlobalKey<FormState> formKey,
+      AuthController controller,
+      AuthController authReader,
+      Color panelBg,
+      Color primaryColor,
+      Color auxTextColor,
+      ) {
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 400),
       decoration: BoxDecoration(
-        color: blurColor,
+        color: panelBg, // Cor de fundo com opacidade
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // backdrop-blur-lg
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: Form(
@@ -131,21 +139,20 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
 
-                  // Campo Email
-                  ThemedInputField(
+                  // ✅ Campo Email - Agora usando CustomTextField
+                  CustomTextField(
                     label: 'Email',
-                    icon: Icons.email,
+                    icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    onChanged: authReader
-                        .setEmail, // Usa o Reader para chamar o setter
+                    onChanged: authReader.setEmail,
                     validator: controller.validateEmail,
                   ),
                   const SizedBox(height: 16.0),
 
-                  // Campo Senha
-                  ThemedInputField(
+                  // ✅ Campo Senha - Agora usando CustomTextField
+                  CustomTextField(
                     label: 'Senha',
-                    icon: Icons.lock,
+                    icon: Icons.lock_outline,
                     isPassword: true,
                     onChanged: authReader.setPassword,
                     validator: controller.validatePassword,
@@ -161,11 +168,11 @@ class LoginPage extends StatelessWidget {
                           Checkbox(
                             value: controller.rememberMe,
                             onChanged: authReader.toggleRememberMe,
-                            activeColor: Theme.of(context).colorScheme.primary,
+                            activeColor: primaryColor,
                           ),
-                          const Text(
+                          Text(
                             'Lembrar-me',
-                            style: TextStyle(color: Color(0xFF9CA3AF)),
+                            style: TextStyle(color: auxTextColor),
                           ),
                         ],
                       ),
@@ -175,9 +182,7 @@ class LoginPage extends StatelessWidget {
                         },
                         child: Text(
                           'Esqueceu a senha?',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: TextStyle(color: primaryColor),
                         ),
                       ),
                     ],
@@ -187,16 +192,14 @@ class LoginPage extends StatelessWidget {
                   // Botão Entrar
                   CustomButton(
                     text: 'Entrar',
-                    isLoading: controller
-                        .isLoading, // Pega o estado de loading do Controller
+                    isLoading: controller.isLoading,
                     onPressed: controller.isLoading
                         ? null
                         : () {
-                            if (formKey.currentState!.validate()) {
-                              authReader
-                                  .login(); // Chama a lógica de login do Controller
-                            }
-                          },
+                      if (formKey.currentState!.validate()) {
+                        authReader.login();
+                      }
+                    },
                   ),
 
                   const SizedBox(height: 16.0),
@@ -205,9 +208,9 @@ class LoginPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         'Não tem uma conta?',
-                        style: TextStyle(color: Color(0xFF9CA3AF)),
+                        style: TextStyle(color: auxTextColor),
                       ),
                       TextButton(
                         onPressed: () {
@@ -219,9 +222,7 @@ class LoginPage extends StatelessWidget {
                         },
                         child: Text(
                           'Cadastre-se',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: TextStyle(color: primaryColor),
                         ),
                       ),
                     ],

@@ -36,7 +36,8 @@ dependencies:
   google_fonts: ^6.1.0
   cupertino_icons: ^1.0.8
   provider: ^6.1.1
-  go_router: ^13.0.0 # Use a versão mais recente
+  go_router: ^13.0.0
+  font_awesome_flutter: ^10.6.0 # Use a versão mais recente
 
 dev_dependencies:
   flutter_test:

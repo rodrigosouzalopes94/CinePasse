@@ -1,11 +1,11 @@
 // lib/main.dart
 
+import 'package:cine_passe_app/features/controllers/auth_controller.dart';
+import 'package:cine_passe_app/features/controllers/registration_controller.dart';
+import 'package:cine_passe_app/features/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_themes.dart';
-import 'features/auth/controllers/registration_controller.dart';
-import 'features/auth/controllers/auth_controller.dart';
-import 'features/auth/pages/login_page.dart'; // Nossa página inicial
 
 // ⚠️ Lembre-se de adicionar as dependências do Firebase ao pubspec.yaml
 // import 'package:firebase_core/firebase_core.dart';
