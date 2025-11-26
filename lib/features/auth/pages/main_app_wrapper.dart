@@ -2,10 +2,8 @@
 
 import 'package:flutter/material.dart';
 import '../../../widgets/bottom_nav_bar.dart';
-// Importe as páginas que serão as abas (vamos criá-las em seguida)
-import 'home/home_page.dart';
-import 'tickets/tickets_page.dart';
-import 'plans/plans_page.dart';
+// Importe as páginas que serão as abas (vamos criá-las em seguida).
+///
 
 class MainAppWrapper extends StatefulWidget {
   const MainAppWrapper({super.key});
@@ -28,9 +26,7 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
 
   // 2. Lista de Telas Principais (serão construídas aqui)
   final List<Widget> _pages = [
-    const HomePage(),
-    const TicketsPage(),
-    const PlansPage(),
+
   ];
 
   // 3. Função de Callback para o BottomNavBar

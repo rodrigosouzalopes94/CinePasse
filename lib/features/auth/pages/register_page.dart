@@ -42,7 +42,7 @@ class RegisterPage extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.6),
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 32.0),

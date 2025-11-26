@@ -46,7 +46,7 @@ class BottomNavBar extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Cor de fundo do BottomNav (themed-bg-light/80)
-    final barColor = Theme.of(context).cardColor.withOpacity(0.9);
+    final barColor = Theme.of(context).cardColor.withValues(alpha: 0.9);
 
     // Usamos BottomAppBar e ClipRRect+BackdropFilter para replicar o efeito blur
     return ClipRRect(

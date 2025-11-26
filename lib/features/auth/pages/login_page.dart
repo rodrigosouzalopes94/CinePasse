@@ -35,7 +35,7 @@ class LoginPage extends StatelessWidget {
 
           // 2. Overlay Escuro
           Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.5)),
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
           ),
 
           // 3. Conteúdo Principal
@@ -71,7 +71,7 @@ class LoginPage extends StatelessWidget {
               fontWeight: FontWeight.w900,
               color: Theme.of(context).colorScheme.primary,
               shadows: [
-                Shadow(blurRadius: 15.0, color: Colors.black.withOpacity(0.7)),
+                Shadow(blurRadius: 15.0, color: Colors.black.withValues(alpha: 0.7)),
               ],
             ),
             children: const [
@@ -98,7 +98,7 @@ class LoginPage extends StatelessWidget {
     AuthController
     authReader, // Controller que é usado apenas para chamar funções
   ) {
-    final blurColor = Theme.of(context).cardColor.withOpacity(0.75);
+    final blurColor = Theme.of(context).cardColor.withValues(alpha: 0.75);
 
     return Container(
       width: double.infinity,
