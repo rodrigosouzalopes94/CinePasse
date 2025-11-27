@@ -1,27 +1,36 @@
+import 'package:cine_passe_app/features/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// ✅ Importa o Serviço
 
 class AuthController with ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // 1. Substituímos a instância direta do FirebaseAuth pelo nosso Service
+  final AuthService _authService = AuthService();
 
+  // -------------------------------------------------------------------
   // ESTADO
+  // -------------------------------------------------------------------
   String _email = '';
   String _password = '';
   bool _isLoading = false;
   String? _errorMessage;
   bool _rememberMe = false;
 
+  // -------------------------------------------------------------------
   // GETTERS
+  // -------------------------------------------------------------------
   String get email => _email;
   String get password => _password;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get rememberMe => _rememberMe;
 
-  // Verifica o estado real do Firebase
-  bool get isLoggedIn => _auth.currentUser != null;
+  // Verifica se está logado consultando o serviço
+  bool get isLoggedIn => _authService.currentUser != null;
 
+  // -------------------------------------------------------------------
   // SETTERS
+  // -------------------------------------------------------------------
   void setEmail(String value) {
     _email = value.trim();
     if (_errorMessage != null) {
@@ -39,7 +48,9 @@ class AuthController with ChangeNotifier {
     notifyListeners();
   }
 
-  // 1. LOGIN (Firebase Real)
+  // -------------------------------------------------------------------
+  // LÓGICA DE LOGIN
+  // -------------------------------------------------------------------
   Future<void> login() async {
     if (_email.isEmpty || _password.isEmpty) {
       _errorMessage = 'Preencha email e senha.';
@@ -51,12 +62,13 @@ class AuthController with ChangeNotifier {
     _clearError();
 
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: _email,
-        password: _password,
-      );
-      // O listener no main.dart detectará a mudança de estado e navegará automaticamente
+      // ✅ Chama o método do Serviço
+      await _authService.login(_email, _password);
+
+      // Sucesso! O listener no main.dart vai detectar a mudança de estado
+      // via authStateChanges e navegará automaticamente.
     } on FirebaseAuthException catch (e) {
+      // O Serviço deixou o erro subir, nós tratamos aqui para a UI
       _handleFirebaseError(e.code);
     } catch (e) {
       _errorMessage = 'Erro inesperado. Tente novamente.';
@@ -65,7 +77,9 @@ class AuthController with ChangeNotifier {
     }
   }
 
-  // 2. RECUPERAÇÃO DE SENHA (Firebase Real)
+  // -------------------------------------------------------------------
+  // LÓGICA DE RECUPERAÇÃO DE SENHA
+  // -------------------------------------------------------------------
   Future<bool> resetPassword(String email) async {
     if (email.isEmpty) {
       _errorMessage = 'Informe seu email para redefinir a senha.';
@@ -77,7 +91,8 @@ class AuthController with ChangeNotifier {
     _clearError();
 
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      // ✅ Chama o método do Serviço
+      await _authService.resetPassword(email);
       _setLoading(false);
       return true;
     } on FirebaseAuthException catch (e) {
@@ -91,13 +106,18 @@ class AuthController with ChangeNotifier {
     }
   }
 
-  // 3. LOGOUT (Firebase Real)
+  // -------------------------------------------------------------------
+  // LÓGICA DE LOGOUT
+  // -------------------------------------------------------------------
   Future<void> logout() async {
-    await _auth.signOut();
+    // ✅ Chama o método do Serviço
+    await _authService.logout();
     notifyListeners();
   }
 
+  // -------------------------------------------------------------------
   // MÉTODOS AUXILIARES
+  // -------------------------------------------------------------------
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -108,10 +128,11 @@ class AuthController with ChangeNotifier {
     notifyListeners();
   }
 
+  // Tradutor de erros (Fica aqui no Controller pois é texto para a UI)
   void _handleFirebaseError(String errorCode) {
     switch (errorCode) {
       case 'user-not-found':
-      case 'invalid-credential': // Novo código comum no Firebase Auth recente
+      case 'invalid-credential': // Código novo comum
         _errorMessage = 'Email ou senha incorretos.';
         break;
       case 'wrong-password':
@@ -132,6 +153,7 @@ class AuthController with ChangeNotifier {
     notifyListeners();
   }
 
+  // Validações locais (UI)
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) return 'Email obrigatório.';
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value))

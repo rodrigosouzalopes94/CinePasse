@@ -39,6 +39,9 @@ dependencies:
   go_router: ^13.0.0
   font_awesome_flutter: ^10.6.0 # Use a versão mais recente
   intl: ^0.20.2
+  firebase_auth: ^6.1.2
+  cloud_firestore: ^6.1.0
+  firebase_core: ^4.2.1
 
 dev_dependencies:
   flutter_test:

@@ -1,11 +1,17 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:cine_passe_app/features/controllers/auth_controller.dart';
 import 'package:cine_passe_app/features/controllers/theme_controller.dart';
 import 'package:cine_passe_app/features/pages/home_page.dart';
 import 'package:cine_passe_app/features/pages/tickets_page.dart';
-import 'package:cine_passe_app/widgets/cine_passe_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+// Páginas
+// Ajuste os caminhos conforme sua estrutura de pastas atual (lib/pages/ ou lib/features/pages/)
+
+// Widgets
+import 'package:cine_passe_app/widgets/cine_passe_app_bar.dart';
 
 // Enum para identificar as abas da navegação inferior
 enum TabItem { home, tickets, plans }
@@ -50,7 +56,7 @@ class BottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      // 🚀 AQUI ESTÁ A CORREÇÃO: SafeArea envolve apenas os ícones/texto
+      // 🚀 SafeArea envolve apenas os ícones/texto
       child: SafeArea(
         top: false, // Não precisa proteger o topo da barra
         child: BottomNavigationBar(
@@ -64,10 +70,8 @@ class BottomNavBar extends StatelessWidget {
           ),
           backgroundColor:
               Colors.transparent, // Transparente para usar a cor do Container
-          elevation:
-              0, // Remove a sombra padrão do Material (usamos a do Container)
-          type: BottomNavigationBarType
-              .fixed, // Evita animação de "shifiting" que pode quebrar o layout
+          elevation: 0, // Remove a sombra padrão do Material
+          type: BottomNavigationBarType.fixed, // Evita animação de "shifiting"
           // Tamanho das fontes
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
@@ -115,13 +119,8 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
     TabItem.plans: 2,
   };
 
-  final List<Widget> _pages = [
-    const HomePage(),
-    const TicketsPage(),
-    //
-    const PlansPage(),
-    // // Certifique-se de que PlansPage existe
-  ];
+  // ✅ Lista de páginas completa para evitar erro de índice
+  final List<Widget> _pages = [const HomePage(), const TicketsPage()];
 
   void _selectTab(TabItem tabItem) {
     if (_currentTab != tabItem) {
@@ -143,7 +142,7 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
 
-    // Mapeamento simples de títulos
+    // Mapeamento simples de títulos para o AppBar decidir o logo/texto
     String title;
     switch (_currentTab) {
       case TabItem.home:
@@ -159,7 +158,6 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
 
     return Scaffold(
       // extendBody: true faz o corpo da página ir até o final da tela (atrás da navbar)
-      // Isso é ótimo se sua navbar for semi-transparente.
       extendBody: true,
 
       appBar: CinePasseAppBar(
@@ -167,6 +165,14 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
         onBackPress: _currentTab != TabItem.home ? _handleBackPress : null,
         onThemeTogglePress: themeController.toggleTheme,
         onUserMenuPress: () => debugPrint('Menu Usuário'),
+
+        // ✅ Implementação do Logout
+        onLogoutPress: () {
+          // Chama o logout do AuthController
+          // O listener no main.dart vai detectar a mudança e redirecionar para Login
+          context.read<AuthController>().logout();
+        },
+
         isDarkMode: themeController.isDarkMode,
       ),
 

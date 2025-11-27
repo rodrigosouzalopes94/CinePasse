@@ -1,3 +1,4 @@
+import 'dart:ui'; // ✅ MOVIDO PARA O TOPO
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -6,6 +7,7 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackPress;
   final VoidCallback? onUserMenuPress;
   final VoidCallback? onThemeTogglePress;
+  final VoidCallback? onLogoutPress;
   final bool isDarkMode;
 
   const CinePasseAppBar({
@@ -14,6 +16,7 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBackPress,
     this.onUserMenuPress,
     this.onThemeTogglePress,
+    this.onLogoutPress,
     required this.isDarkMode,
   });
 
@@ -21,42 +24,44 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   Widget _buildLeading(BuildContext context) {
+    // Botão Voltar aparece apenas em telas secundárias
     if (telaAtual == 'movieDetail' || telaAtual == 'planos') {
       return IconButton(
-        // <i class="fas fa-arrow-left"></i>
         icon: const Icon(FontAwesomeIcons.arrowLeft, size: 20),
         onPressed: onBackPress,
       );
     }
-    return const SizedBox.shrink(); // Widget vazio
+    return const SizedBox.shrink();
   }
 
   Widget _buildTitle(BuildContext context) {
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final defaultTextStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
-      fontWeight: FontWeight.w800,
-      fontSize: 20,
-    );
+    final defaultTextStyle = Theme.of(
+      context,
+    ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, fontSize: 20);
 
-    // Corresponde a h1 v-else-if="telaAtual === 'meusIngressos'"
     if (telaAtual == 'meusIngressos') {
       return RichText(
         text: TextSpan(
           style: defaultTextStyle,
           children: [
-            TextSpan(text: 'MEUS', style: TextStyle(color: primaryColor)),
+            TextSpan(
+              text: 'MEUS',
+              style: TextStyle(color: primaryColor),
+            ),
             const TextSpan(text: ' INGRESSOS'),
           ],
         ),
       );
-    }
-    // Corresponde a h1 v-else (CINEPASSE)
-    else {
+    } else {
       return RichText(
         text: TextSpan(
           style: defaultTextStyle,
           children: [
-            TextSpan(text: 'CINE', style: TextStyle(color: primaryColor)),
+            TextSpan(
+              text: 'CINE',
+              style: TextStyle(color: primaryColor),
+            ),
             const TextSpan(text: 'PASSE'),
           ],
         ),
@@ -65,40 +70,58 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildActions() {
+    // A ordem aqui define a posição: Esquerda -> Direita
     return [
-      // 1. Botão Alternar Tema (darkMode)
+      // 1. Botão de Troca de Tema
       IconButton(
         onPressed: onThemeTogglePress,
-        // <i :class="!darkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
+        tooltip: 'Alternar Tema',
         icon: Icon(
           isDarkMode ? FontAwesomeIcons.solidSun : FontAwesomeIcons.solidMoon,
           size: 20,
         ),
       ),
-      // 2. Botão Menu do Usuário
+
+      // 2. ✅ Botão de Sair (Exatamente ao lado do Tema)
+      // Ele aparecerá em TODAS as telas (Home, Ingressos, Planos)
+      IconButton(
+        // Se onLogoutPress for null, o botão ficará desabilitado (cinza).
+        // Certifique-se de passá-lo no MainAppWrapper.
+        onPressed: onLogoutPress,
+        tooltip: 'Sair',
+        icon: const Icon(
+          FontAwesomeIcons.rightFromBracket, // Ícone de Logout
+          size: 20,
+        ),
+      ),
+
+      // 3. Menu de Usuário
       IconButton(
         onPressed: onUserMenuPress,
-        // <i class="fas fa-user"></i>
         icon: const Icon(FontAwesomeIcons.solidUser, size: 20),
       ),
+
       const SizedBox(width: 8),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    // themed-bg-light/80 border-b themed-border / backdrop-filter: blur(16px)
     return AppBar(
       automaticallyImplyLeading: false,
-      toolbarHeight: 64, // Ajuste de altura
+      toolbarHeight: 64,
       titleSpacing: 0,
 
-      // Simulação do BackdropFilter e Padding
+      // Fundo com Blur para garantir visibilidade em cima de imagens
       flexibleSpace: ClipRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5), // Blur
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: Container(
-            color: Theme.of(context).appBarTheme.backgroundColor?.withValues(alpha: 0.8) ?? Colors.white.withValues(alpha: 0.8),
+            color:
+                Theme.of(
+                  context,
+                ).appBarTheme.backgroundColor?.withOpacity(0.8) ??
+                Colors.white.withOpacity(0.8),
           ),
         ),
       ),
@@ -106,23 +129,24 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: _buildLeading(context),
 
       title: Padding(
-        padding: EdgeInsets.only(left: _buildLeading(context) is SizedBox ? 16.0 : 0, right: 16.0),
+        padding: EdgeInsets.only(
+          left: _buildLeading(context) is SizedBox ? 16.0 : 0,
+          right: 16.0,
+        ),
         child: _buildTitle(context),
       ),
+
+      // As ações são renderizadas incondicionalmente aqui
       actions: _buildActions(),
 
-      // themed-border
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
         child: Container(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+          color: Theme.of(context).dividerColor.withOpacity(0.5),
           height: 1.0,
         ),
       ),
     );
   }
 }
-
-// Para usar o BackdropFilter
-import 'dart:ui';

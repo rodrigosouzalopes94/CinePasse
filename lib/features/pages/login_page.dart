@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:cine_passe_app/features/pages/main_app_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui'; // Para o BackdropFilter
 import 'package:provider/provider.dart';
@@ -209,39 +208,6 @@ class LoginPage extends StatelessWidget {
                                       ),
                                     ),
                                   ],
-                                ),
-
-                                // 🛠️ ÁREA DE DEBUG / ACESSO RÁPIDO
-                                const SizedBox(height: 24.0),
-                                const Divider(),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    '--- Acesso Rápido (Debug) ---',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: auxTextColor.withOpacity(0.7),
-                                    ),
-                                  ),
-                                ),
-                                TextButton.icon(
-                                  onPressed: () {
-                                    // Pula a autenticação e vai direto para o App Principal
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (ctx) =>
-                                            const MainAppWrapper(),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(
-                                    Icons.developer_mode,
-                                    size: 16,
-                                  ),
-                                  label: const Text('Entrar Sem Login'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.orange,
-                                  ),
                                 ),
                               ],
                             ),

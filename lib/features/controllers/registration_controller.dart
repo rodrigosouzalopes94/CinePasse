@@ -1,11 +1,18 @@
-// lib/features/auth/controllers/registration_controller.dart
-
+import 'package:cine_passe_app/features/api/user_firestore_service.dart';
+import 'package:cine_passe_app/features/services/auth_service.dart';
+import 'package:cine_passe_app/models/user_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/user_model.dart'; // Importa o seu UserModel
 
-// Usamos ChangeNotifier para gerenciar o estado do formulário.
 class RegistrationController extends ChangeNotifier {
+  // -------------------------------------------------------------------
+  // Dependências (Services e API)
+  // -------------------------------------------------------------------
+  final AuthService _authService = AuthService();
+  final UserFirestoreService _userFirestoreService = UserFirestoreService();
+
+  // -------------------------------------------------------------------
   // Estado do Formulário
+  // -------------------------------------------------------------------
   String _name = '';
   String _cpf = '';
   String _email = '';
@@ -13,105 +20,128 @@ class RegistrationController extends ChangeNotifier {
   int _age = 0;
 
   bool _isLoading = false;
+  String? _errorMessage;
 
-  // Getters para acessar o estado
+  // -------------------------------------------------------------------
+  // Getters
+  // -------------------------------------------------------------------
   String get name => _name;
   String get email => _email;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   // -------------------------------------------------------------------
-  // Setters (Para a UI atualizar o estado)
+  // Setters (Otimizados para evitar rebuild desnecessário)
   // -------------------------------------------------------------------
+  // NOTA: Removemos notifyListeners() daqui para evitar que o teclado feche
+  // a cada letra digitada na UI (problema de perda de foco).
+
   void setName(String value) {
     _name = value;
-    notifyListeners();
+    // Só limpamos o erro visualmente se ele existir, para evitar rebuild constante
+    if (_errorMessage != null) _clearError();
   }
 
   void setCpf(String value) {
     _cpf = value;
-    notifyListeners();
   }
 
   void setEmail(String value) {
-    _email = value;
-    notifyListeners();
+    _email = value.trim();
   }
 
   void setPassword(String value) {
     _password = value;
-    notifyListeners();
   }
 
-  void setAge(int value) {
-    _age = value;
-    notifyListeners();
+  void setAge(String value) {
+    _age = int.tryParse(value) ?? 0;
   }
 
   // -------------------------------------------------------------------
   // Validações
   // -------------------------------------------------------------------
-
   String? validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Name is required.';
-    }
+    if (value == null || value.isEmpty) return 'Nome é obrigatório.';
     return null;
   }
 
   String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required.';
-    }
-    // Uma regex básica para email (pode ser mais complexa)
+    if (value == null || value.isEmpty) return 'Email é obrigatório.';
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Enter a valid email address.';
-    }
+    if (!emailRegex.hasMatch(value)) return 'Email inválido.';
     return null;
   }
 
   String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required.';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters.';
-    }
+    if (value == null || value.isEmpty) return 'Senha é obrigatória.';
+    if (value.length < 6) return 'A senha deve ter pelo menos 6 caracteres.';
+    return null;
+  }
+
+  String? validateCpf(String? value) {
+    if (value == null || value.isEmpty) return 'CPF é obrigatório.';
+    if (value.length != 11) return 'CPF inválido (11 dígitos).';
+    return null;
+  }
+
+  String? validateAge(String? value) {
+    if (value == null || value.isEmpty) return 'Idade obrigatória.';
+    final age = int.tryParse(value);
+    if (age == null || age < 10) return 'Idade inválida.';
     return null;
   }
 
   // -------------------------------------------------------------------
-  // Lógica de Submissão
+  // Lógica de Registro (Conectada aos Services)
   // -------------------------------------------------------------------
-  Future<void> registerUser() async {
-    // Simulação de Validação do Formulário (O Form Widget fará a validação da UI)
-    if (_name.isEmpty || _email.isEmpty || _password.isEmpty) {
-      // Aqui você lidaria com erros, talvez mostrando uma Snackbar.
-      print('Form validation failed in controller.');
-      return;
+  Future<bool> registerUser() async {
+    // 1. Validação prévia de campos vazios antes de chamar o Firebase
+    if (_name.isEmpty || _email.isEmpty || _password.isEmpty || _cpf.isEmpty) {
+      _errorMessage = 'Por favor, preencha todos os campos.';
+      notifyListeners(); // Avisa a UI para mostrar o erro
+      return false;
     }
 
     _isLoading = true;
+    _errorMessage = null;
+    notifyListeners(); // Avisa a UI para mostrar o loading spinner
+
+    try {
+      // 2. Cria a conta no Firebase Auth
+      final userCredential = await _authService.register(_email, _password);
+
+      if (userCredential != null) {
+        // 3. Prepara o modelo de dados
+        final newUser = UserModel(
+          uid: userCredential.uid, // Usa o UID gerado pelo Auth
+          nome: _name,
+          cpf: _cpf,
+          email: _email,
+          idade: _age,
+        );
+
+        // 4. Salva os dados complementares no Firestore
+        await _userFirestoreService.saveUser(newUser);
+
+        _isLoading = false;
+        notifyListeners();
+        return true; // Sucesso
+      }
+    } catch (e) {
+      // Trata erros vindos do AuthService ou FirestoreService
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      debugPrint('Erro no Registro: $_errorMessage');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+
+    return false; // Falha
+  }
+
+  void _clearError() {
+    _errorMessage = null;
     notifyListeners();
-
-    // Cria o objeto Model
-    final newUser = UserModel(
-      nome:
-          _name, // Usando 'nome' conforme definido em user_model.dart (se for manter o português lá)
-      cpf: _cpf,
-      email: _email,
-      senha: _password, // Usando 'senha' conforme definido em user_model.dart
-      idade: _age,
-    );
-
-    // Simulação de chamada de API
-    await Future.delayed(const Duration(seconds: 2));
-
-    print('User registered successfully: ${newUser.toJson()}');
-
-    _isLoading = false;
-    notifyListeners();
-
-    // Lógica de navegação pós-registro (ex: ir para a tela de login)
   }
 }
