@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "657425286496",
+    "project_id": "cinepasse-51665",
+    "storage_bucket": "cinepasse-51665.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657425286496:android:015e104f2ca9f8419cca05",
+        "android_client_info": {
+          "package_name": "com.example.cine_passe_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNcYwyemEZeudXGfR_OWA32v01JTXKWnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

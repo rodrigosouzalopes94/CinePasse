@@ -1,9 +1,102 @@
-// lib/pages/main_app_wrapper.dart
+// ignore_for_file: deprecated_member_use
 
+import 'package:cine_passe_app/features/controllers/theme_controller.dart';
+import 'package:cine_passe_app/features/pages/home_page.dart';
+import 'package:cine_passe_app/features/pages/tickets_page.dart';
+import 'package:cine_passe_app/widgets/cine_passe_app_bar.dart';
 import 'package:flutter/material.dart';
-import '../../../widgets/bottom_nav_bar.dart';
-// Importe as páginas que serão as abas (vamos criá-las em seguida).
-///
+import 'package:provider/provider.dart';
+
+// Enum para identificar as abas da navegação inferior
+enum TabItem { home, tickets, plans }
+
+// Widget da Barra de Navegação Ajustado
+class BottomNavBar extends StatelessWidget {
+  final TabItem currentTab;
+  final Function(TabItem) onSelectTab;
+
+  const BottomNavBar({
+    super.key,
+    required this.currentTab,
+    required this.onSelectTab,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    // Cor de fundo sólida ou semi-transparente para garantir leitura
+    final backgroundColor = isDarkMode
+        ? const Color(0xFF1C1C1C).withOpacity(0.98)
+        : Colors.white.withOpacity(0.98);
+
+    return Container(
+      // O Container desenha o fundo e a borda superior
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: Border(
+          top: BorderSide(
+            color: theme.dividerColor.withOpacity(0.5),
+            width: 1.0,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      // 🚀 AQUI ESTÁ A CORREÇÃO: SafeArea envolve apenas os ícones/texto
+      child: SafeArea(
+        top: false, // Não precisa proteger o topo da barra
+        child: BottomNavigationBar(
+          currentIndex: TabItem.values.indexOf(currentTab),
+          onTap: (index) => onSelectTab(TabItem.values[index]),
+
+          // Estilização
+          selectedItemColor: primaryColor,
+          unselectedItemColor: theme.textTheme.bodyMedium?.color?.withOpacity(
+            0.5,
+          ),
+          backgroundColor:
+              Colors.transparent, // Transparente para usar a cor do Container
+          elevation:
+              0, // Remove a sombra padrão do Material (usamos a do Container)
+          type: BottomNavigationBarType
+              .fixed, // Evita animação de "shifiting" que pode quebrar o layout
+          // Tamanho das fontes
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.confirmation_number_rounded),
+              label: 'Ingressos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.star_rounded),
+              label: 'Planos',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class MainAppWrapper extends StatefulWidget {
   const MainAppWrapper({super.key});
@@ -13,23 +106,23 @@ class MainAppWrapper extends StatefulWidget {
 }
 
 class _MainAppWrapperState extends State<MainAppWrapper> {
-  // 1. Gerencia o estado da aba ativa
   TabItem _currentTab = TabItem.home;
-  int _currentIndex = 0; // Index para o IndexedStack
+  int _currentIndex = 0;
 
-  // Mapeia o Enum para o Index e para a Tela (Page)
   final Map<TabItem, int> tabToIndex = {
     TabItem.home: 0,
     TabItem.tickets: 1,
     TabItem.plans: 2,
   };
 
-  // 2. Lista de Telas Principais (serão construídas aqui)
   final List<Widget> _pages = [
-
+    const HomePage(),
+    const TicketsPage(),
+    //
+    const PlansPage(),
+    // // Certifique-se de que PlansPage existe
   ];
 
-  // 3. Função de Callback para o BottomNavBar
   void _selectTab(TabItem tabItem) {
     if (_currentTab != tabItem) {
       setState(() {
@@ -39,23 +132,47 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
     }
   }
 
+  void _handleBackPress() {
+    setState(() {
+      _currentTab = TabItem.home;
+      _currentIndex = tabToIndex[TabItem.home]!;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeController = Provider.of<ThemeController>(context);
+
+    // Mapeamento simples de títulos
+    String title;
+    switch (_currentTab) {
+      case TabItem.home:
+        title = 'home';
+        break;
+      case TabItem.tickets:
+        title = 'meusIngressos';
+        break;
+      case TabItem.plans:
+        title = 'planos';
+        break;
+    }
+
     return Scaffold(
-      // A AppBar não é obrigatória para a Home, mas pode ser útil para o título/botão de perfil
-      appBar: AppBar(
-        title: Text(
-          _currentTab == TabItem.home
-              ? 'CINEPASSE'
-              : _currentTab.name.toUpperCase(),
-        ),
-        automaticallyImplyLeading: false, // Esconde o botão voltar
+      // extendBody: true faz o corpo da página ir até o final da tela (atrás da navbar)
+      // Isso é ótimo se sua navbar for semi-transparente.
+      extendBody: true,
+
+      appBar: CinePasseAppBar(
+        telaAtual: title,
+        onBackPress: _currentTab != TabItem.home ? _handleBackPress : null,
+        onThemeTogglePress: themeController.toggleTheme,
+        onUserMenuPress: () => debugPrint('Menu Usuário'),
+        isDarkMode: themeController.isDarkMode,
       ),
 
-      // 4. IndexedStack: Apenas o conteúdo visível é reconstruído/exibido
+      // O IndexedStack preserva o estado das páginas quando troca de aba
       body: IndexedStack(index: _currentIndex, children: _pages),
 
-      // 5. BottomNavigationBar: A barra de navegação vive aqui
       bottomNavigationBar: BottomNavBar(
         currentTab: _currentTab,
         onSelectTab: _selectTab,
