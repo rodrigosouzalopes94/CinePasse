@@ -1,5 +1,7 @@
 import 'package:cine_passe_app/features/controllers/auth_controller.dart';
 import 'package:cine_passe_app/features/controllers/movie_controller.dart';
+import 'package:cine_passe_app/features/controllers/payment_controller.dart';
+import 'package:cine_passe_app/features/controllers/plan_controller.dart';
 import 'package:cine_passe_app/features/controllers/registration_controller.dart';
 import 'package:cine_passe_app/features/controllers/theme_controller.dart';
 import 'package:cine_passe_app/features/controllers/ticket_controller.dart';
@@ -7,20 +9,21 @@ import 'package:cine_passe_app/features/pages/login_page.dart';
 import 'package:cine_passe_app/features/pages/main_app_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart'; // Arquivo gerado pelo flutterfire configure
 
 // -------------------------------------------------------------------
-// IMPORTAÇÕES DE TEMAS E CONTROLADORES GLOBAIS
+// IMPORTAÇÕES DE TEMAS
 // -------------------------------------------------------------------
 import 'core/theme/app_themes.dart';
+
+// -------------------------------------------------------------------
 
 void main() async {
   // 1. Garante que a engine do Flutter esteja pronta antes de código nativo
   WidgetsFlutterBinding.ensureInitialized();
 
   // 2. Inicializa o Firebase com as opções da plataforma (Android/iOS)
-  // Certifique-se de que o arquivo firebase_options.dart existe e está correto.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
@@ -36,6 +39,11 @@ void main() async {
         // --- Controladores de Dados (Features) ---
         ChangeNotifierProvider(create: (_) => TicketController()),
         ChangeNotifierProvider(create: (_) => MovieController()),
+
+        // 🚀 ADICIONADO: PlanController Global
+        // Isso permite que a CheckoutPage (e qualquer outra tela) acesse o controller
+        ChangeNotifierProvider(create: (_) => PlanController()),
+        ChangeNotifierProvider(create: (_) => PaymentController()),
       ],
       child: const CinePasseApp(),
     ),

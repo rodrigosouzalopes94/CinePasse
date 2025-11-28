@@ -3,12 +3,14 @@
 import 'package:cine_passe_app/features/controllers/auth_controller.dart';
 import 'package:cine_passe_app/features/controllers/theme_controller.dart';
 import 'package:cine_passe_app/features/pages/home_page.dart';
+import 'package:cine_passe_app/features/pages/plans_page.dart';
 import 'package:cine_passe_app/features/pages/tickets_page.dart';
+// Ajuste os caminhos de import conforme sua estrutura real
+// Se os arquivos estiverem em lib/pages/, use o caminho correspondente
+// ✅ Import da PlansPage
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-// Páginas
-// Ajuste os caminhos conforme sua estrutura de pastas atual (lib/pages/ ou lib/features/pages/)
 
 // Widgets
 import 'package:cine_passe_app/widgets/cine_passe_app_bar.dart';
@@ -71,7 +73,7 @@ class BottomNavBar extends StatelessWidget {
           backgroundColor:
               Colors.transparent, // Transparente para usar a cor do Container
           elevation: 0, // Remove a sombra padrão do Material
-          type: BottomNavigationBarType.fixed, // Evita animação de "shifiting"
+          type: BottomNavigationBarType.fixed, // Evita animação de "shifting"
           // Tamanho das fontes
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
@@ -119,8 +121,12 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
     TabItem.plans: 2,
   };
 
-  // ✅ Lista de páginas completa para evitar erro de índice
-  final List<Widget> _pages = [const HomePage(), const TicketsPage()];
+  // ✅ Lista de páginas completa com a PlansPage
+  final List<Widget> _pages = [
+    const HomePage(),
+    const TicketsPage(),
+    const PlansPage(), // ✅ Adicionado aqui
+  ];
 
   void _selectTab(TabItem tabItem) {
     if (_currentTab != tabItem) {
