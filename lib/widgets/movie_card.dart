@@ -111,9 +111,14 @@ class _MovieCardState extends State<MovieCard> {
                           children: [
                             // Classificação Etária (span.classificacao)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: getRatingColor(widget.movie.classificacao),
+                                color: getRatingColor(
+                                  widget.movie.classificacao,
+                                ),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -127,15 +132,31 @@ class _MovieCardState extends State<MovieCard> {
                             ),
 
                             // Gênero
-                            Text(widget.movie.genero, style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
+                            Text(
+                              widget.movie.genero,
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 14,
+                              ),
+                            ),
 
                             // Duração
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(FontAwesomeIcons.clock, size: 12, color: Colors.grey.shade500),
+                                Icon(
+                                  FontAwesomeIcons.clock,
+                                  size: 12,
+                                  color: Colors.grey.shade500,
+                                ),
                                 const SizedBox(width: 4),
-                                Text(widget.movie.duracao, style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
+                                Text(
+                                  widget.movie.duracao,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -145,7 +166,10 @@ class _MovieCardState extends State<MovieCard> {
                         // Sinopse (p text-gray-400 text-sm line-clamp-3)
                         Text(
                           widget.movie.sinopse,
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 13), // text-gray-400
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 13,
+                          ), // text-gray-400
                           maxLines: 3, // line-clamp-3
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -158,21 +182,32 @@ class _MovieCardState extends State<MovieCard> {
                             // Avaliação (span text-yellow-400)
                             Row(
                               children: [
-                                const Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 16),
+                                const Icon(
+                                  FontAwesomeIcons.solidStar,
+                                  color: Colors.amber,
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  widget.movie.mediaAvaliacao.toStringAsFixed(1),
-                                  style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                                  widget.movie.mediaAvaliacao.toStringAsFixed(
+                                    1,
+                                  ),
+                                  style: const TextStyle(
+                                    color: Colors.amber,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
 
                             // Botão Reservar
                             SizedBox(
-                              width: 120, // Largura fixa para o botão dentro do card
+                              width:
+                                  120, // Largura fixa para o botão dentro do card
                               child: CustomButton(
                                 text: 'Reservar',
-                                onPressed: widget.onReserve, // @click.stop="iniciarReserva(filme)"
+                                onPressed: widget
+                                    .onReserve, // @click.stop="iniciarReserva(filme)"
                               ),
                             ),
                           ],
