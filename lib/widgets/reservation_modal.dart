@@ -17,6 +17,9 @@ class ReservationModal extends StatelessWidget {
 
   // Método para exibir o feedback de sucesso (AlertDialog)
   void _showSuccessDialog(BuildContext context) {
+    // É importante garantir que o contexto seja válido antes de chamar o pop
+    if (Navigator.canPop(context)) Navigator.pop(context);
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -43,20 +46,17 @@ class ReservationModal extends StatelessWidget {
     // Isso garante que a instância do timer seja criada e destruída apenas com o modal
     return ChangeNotifierProvider(
       create: (ctx) => ReservationController(
-        // Injeta o Serviço de Timer
         ReservationService(),
-        // Reutiliza o TicketController que já está global (main.dart)
         ctx.read<TicketController>(),
-      )..initialize(), // Chama o initialize() após a criação
+      )..initialize(),
 
       child: Consumer<ReservationController>(
         builder: (ctx, controller, child) {
           final bool hasActivePlan = controller.hasActivePlan;
 
           // 1. Listener de Timeout: Se o timer zerar, fecha o modal
-          // É melhor usar WidgetsBinding.instance.addPostFrameCallback aqui
-          // para evitar problemas com listeners dinâmicos
           if (controller.isTimeout.value && Navigator.canPop(ctx)) {
+            // O addPostFrameCallback é usado para garantir que o pop ocorra após o frame ser construído
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pop(ctx);
             });
@@ -85,12 +85,12 @@ class ReservationModal extends StatelessWidget {
                 _buildTimerHeader(theme, controller),
                 const SizedBox(height: 24),
 
-                // Detalhes do Filme / Plano
                 _buildMovieDetails(theme, controller),
 
                 const SizedBox(height: 24),
 
                 // Conteúdo Principal (Horários e Botão)
+                // ✅ Usando o getter corrigido: controller.isLoadingProfile
                 if (controller.isLoadingProfile)
                   const Center(child: CircularProgressIndicator())
                 else
@@ -103,7 +103,8 @@ class ReservationModal extends StatelessWidget {
                       const Divider(),
                       const SizedBox(height: 16),
 
-                      _buildSummaryAndButton(theme, controller),
+                      // ✅ CORREÇÃO: Passamos o context E o movie
+                      _buildSummaryAndButton(theme, controller, ctx, movie),
                     ],
                   ),
               ],
@@ -117,6 +118,7 @@ class ReservationModal extends StatelessWidget {
   // --- WIDGETS AUXILIARES E LÓGICA DE RENDERING ---
 
   Widget _buildTimerHeader(ThemeData theme, ReservationController controller) {
+    // ✅ ValueListenableBuilder<int> remainingSeconds
     return ValueListenableBuilder<int>(
       valueListenable: controller.remainingSeconds,
       builder: (context, remainingSeconds, child) {
@@ -250,6 +252,7 @@ class ReservationModal extends StatelessWidget {
         Wrap(
           spacing: 10,
           children: controller.sessionTimes.map((time) {
+            // ✅ Usando o getter corrigido: controller.selectedTime
             final isSelected = controller.selectedTime == time;
             return ChoiceChip(
               label: Text(time),
@@ -271,9 +274,12 @@ class ReservationModal extends StatelessWidget {
     );
   }
 
+  // ✅ CORREÇÃO: Recebe o context e o MovieModel
   Widget _buildSummaryAndButton(
     ThemeData theme,
     ReservationController controller,
+    BuildContext context,
+    MovieModel movie,
   ) {
     final bool hasActivePlan = controller.hasActivePlan;
 
@@ -321,12 +327,12 @@ class ReservationModal extends StatelessWidget {
           text: hasActivePlan
               ? 'CONFIRMAR RESERVA (R\$ 0,00)'
               : 'IR PARA PAGAMENTO (R\$ 25,00)',
-          isLoading: controller
-              ._ticketController
-              .isLoading, // Reutiliza o loading do TicketController
+          // ✅ Usa o getter público controller.ticketController.isLoading
+          isLoading: controller.ticketController.isLoading,
           onPressed: controller.selectedTime == null
               ? null
               : () async {
+                  // ✅ CHAMADA CORRIGIDA: Passando o movie.titulo para o controller
                   final success = await controller.handleReservation(
                     movie.titulo,
                   );

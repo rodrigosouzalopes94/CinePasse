@@ -1,12 +1,23 @@
+import 'package:cine_passe_app/features/pages/movie_detail_page.dart';
 import 'package:cine_passe_app/features/services/movie_service.dart';
 import 'package:cine_passe_app/models/movie_model.dart';
+import 'package:cine_passe_app/widgets/movie_card.dart';
+import 'package:cine_passe_app/widgets/reservation_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cine_passe_app/widgets/movie_card.dart';
-// Import do Serviço que conecta ao Firebase
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  // 1. Função para exibir o modal de reserva
+  void _showReservationModal(BuildContext context, MovieModel movie) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ReservationModal(movie: movie),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,27 +29,36 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 1. Hero Banner (Mantido estático por enquanto, ou pode vir do Firebase também)
+          // 1. Hero Banner
           const _HeroBanner(),
 
-          // 2. Movies Grid (Agora Dinâmico via StreamBuilder)
+          // 2. Movies Grid
           StreamBuilder<List<MovieModel>>(
-            stream: movieService.getMoviesStream(), // Escuta o Firestore
+            stream: movieService.getMoviesStream(),
             builder: (context, snapshot) {
-              // Estado: Carregando
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const _LoadingState();
               }
-
-              // Estado: Erro
               if (snapshot.hasError) {
                 return _ErrorState(error: snapshot.error.toString());
               }
 
-              // Dados recuperados (ou lista vazia se null)
               final movies = snapshot.data ?? [];
 
-              return _MoviesGrid(movies: movies);
+              return _MoviesGrid(
+                movies: movies,
+                // ✅ Conecta o onReserve do Card à função local
+                onReserve: (movie) => _showReservationModal(context, movie),
+                // ✅ Conecta o onSelectMovie (ir para detalhes)
+                onSelectMovie: (movie) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MovieDetailPage(movie: movie),
+                    ),
+                  );
+                },
+              );
             },
           ),
         ],
@@ -56,7 +76,6 @@ class _HeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mantendo a identidade visual do seu HTML
     const double bannerHeight = 256.0;
     const Color purple600 = Color(0xFF9333EA);
     const Color pink600 = Color(0xFFEC4899);
@@ -73,7 +92,7 @@ class _HeroBanner extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Container(color: Colors.black.withValues(alpha: 0.4)),
+            child: Container(color: Colors.black.withOpacity(0.4)),
           ),
           const Center(
             child: Padding(
@@ -106,14 +125,20 @@ class _HeroBanner extends StatelessWidget {
 
 class _MoviesGrid extends StatelessWidget {
   final List<MovieModel> movies;
+  // ✅ CORREÇÃO: Adiciona os callbacks que faltavam
+  final Function(MovieModel) onReserve;
+  final Function(MovieModel) onSelectMovie;
 
-  const _MoviesGrid({required this.movies});
+  const _MoviesGrid({
+    required this.movies,
+    required this.onReserve, // Adicionado
+    required this.onSelectMovie, // Adicionado
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Responsividade (Grid Columns)
     final screenWidth = MediaQuery.of(context).size.width;
     int crossAxisCount = 1;
     if (screenWidth >= 600) crossAxisCount = 2;
@@ -151,11 +176,10 @@ class _MoviesGrid extends StatelessWidget {
                     final movie = movies[index];
                     return MovieCard(
                       movie: movie,
-                      // Aqui você conectará com a lógica de navegação para detalhes
-                      onSelectMovie: () =>
-                          debugPrint('Selecionou: ${movie.titulo}'),
-                      // Aqui você conectará com a lógica de reservar ticket
-                      onReserve: () => debugPrint('Reservar: ${movie.titulo}'),
+                      onSelectMovie: () => onSelectMovie(movie),
+                      // Passa o callback para o MovieCard
+                      // O MovieCard espera VoidCallback, então a HomePage já trata o MovieModel no closure
+                      onReserve: () => onReserve(movie),
                     );
                   },
                 ),
@@ -165,13 +189,16 @@ class _MoviesGrid extends StatelessWidget {
   }
 }
 
+// --- WIDGETS DE ESTADO ---
+// (Para evitar que o app quebre se o StreamBuilder retornar estados não processados)
+
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
   @override
   Widget build(BuildContext context) {
     final auxColor =
-        Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5) ??
+        Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5) ??
         Colors.grey;
     return Center(
       child: Padding(

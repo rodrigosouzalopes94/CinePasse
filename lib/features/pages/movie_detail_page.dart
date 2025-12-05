@@ -1,13 +1,27 @@
 import 'package:cine_passe_app/models/movie_model.dart';
+import 'package:cine_passe_app/widgets/reservation_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:cine_passe_app/core/utils/get_rating_color.dart';
 import 'package:cine_passe_app/widgets/custom_button.dart';
+// ✅ Import do Modal
 
 class MovieDetailPage extends StatelessWidget {
   final MovieModel movie;
 
   const MovieDetailPage({super.key, required this.movie});
+
+  // Método para abrir o modal de reserva
+  void _showReservationModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ReservationModal(movie: movie),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +29,11 @@ class MovieDetailPage extends StatelessWidget {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      // Estende o corpo atrás da AppBar para o efeito de transparência
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        // Botão de volta estilizado
         leading: Container(
           margin: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
           decoration: BoxDecoration(
@@ -33,13 +47,11 @@ class MovieDetailPage extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(
-          bottom: 100,
-        ), // Espaço para o botão flutuante se houver
+        padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. BACKDROP E POSTER (Hero Section)
+            // 1. HERO SECTION (Backdrop + Poster)
             _buildHeader(context),
 
             const SizedBox(height: 24),
@@ -70,7 +82,6 @@ class MovieDetailPage extends StatelessWidget {
                   // Badges (Classificação e Estrelas)
                   Row(
                     children: [
-                      // Classificação
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -90,7 +101,6 @@ class MovieDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
 
-                      // Estrelas
                       Icon(
                         FontAwesomeIcons.solidStar,
                         color: Colors.amber,
@@ -124,20 +134,17 @@ class MovieDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 32),
 
-                  // Botão de Ação (Reservar)
+                  // ✅ Botão de Ação (Abre o Modal de Reserva/Timer)
                   CustomButton(
                     text: 'Reservar Ingresso',
-                    onPressed: () {
-                      // TODO: Implementar lógica de reserva (chamar TicketController)
-                      debugPrint('Iniciar reserva para: ${movie.titulo}');
-                    },
+                    onPressed: () => _showReservationModal(context),
                   ),
 
                   const SizedBox(height: 40),
                   const Divider(),
                   const SizedBox(height: 20),
 
-                  // 3. SEÇÃO DE AVALIAÇÕES (Placeholder baseado no HTML)
+                  // Seção Avaliações (Placeholder)
                   Center(
                     child: Column(
                       children: [
@@ -148,7 +155,6 @@ class MovieDetailPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Aqui entrará o widget de lista de avaliações futuramente
                         Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
@@ -213,13 +219,12 @@ class MovieDetailPage extends StatelessWidget {
             ),
           ),
 
-          // Poster Flutuante Centralizado (Opcional, mas comum em apps de cinema)
+          // Poster Flutuante Centralizado
           Positioned(
             bottom: 0,
             left: 20,
             child: Hero(
-              tag:
-                  'movie-poster-${movie.id}', // Animação de transição da Home para cá
+              tag: 'movie-poster-${movie.id}',
               child: Container(
                 width: 120,
                 height: 180,

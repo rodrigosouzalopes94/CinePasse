@@ -9,28 +9,35 @@ class ReservationController with ChangeNotifier {
   // Dependências
   final ReservationService _reservationService;
   final UserFirestoreService _userService = UserFirestoreService();
-  final TicketController _ticketController; // Injetado
+  final TicketController _ticketController;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   ReservationController(this._reservationService, this._ticketController);
 
   // --- ESTADO ---
   UserModel? _userProfile;
-  bool _isLoadingProfile = true;
+  bool _isLoadingProfile = true; // Estado de carregamento do perfil
   String? _selectedTime;
   final List<String> sessionTimes = ['14:00', '16:30', '19:00', '21:30'];
 
-  // --- GETTERS ---
-  UserModel? get userProfile => _userProfile;
-  bool get isLoadingProfile => _isLoadingProfile;
-  String? get selectedTime => _selectedTime;
+  // --- GETTERS PÚBLICOS (CORREÇÃO DE ESCOPO) ---
 
-  // Pass-through do Timer
+  // ✅ CORRIGIDO: Getter para acessar o TicketController (para isLoading)
+  TicketController get ticketController => _ticketController;
+
+  // ✅ CORRIGIDO: Getter para o estado de loading do perfil
+  bool get isLoadingProfile => _isLoadingProfile;
+
+  // ✅ CORRIGIDO: Pass-through do Timer (ValueNotifier)
   ValueNotifier<int> get remainingSeconds =>
       _reservationService.remainingSeconds;
   ValueNotifier<bool> get isTimeout => _reservationService.isTimeout;
 
+  // Getter do horário selecionado
+  String? get selectedTime => _selectedTime;
+
   // Lógica de Negócio
+  UserModel? get userProfile => _userProfile;
   bool get hasActivePlan =>
       _userProfile?.planoAtual != 'Nenhum' && _userProfile?.planoAtual != null;
   String get userPlan => _userProfile?.planoAtual ?? 'Gratuito';
@@ -40,7 +47,6 @@ class ReservationController with ChangeNotifier {
   void initialize() {
     _reservationService.startTimer();
     _loadUserProfile();
-    // Monitora o timeout e avisa
     _reservationService.isTimeout.addListener(_onTimeoutListener);
   }
 
@@ -53,7 +59,6 @@ class ReservationController with ChangeNotifier {
 
   void _onTimeoutListener() {
     if (_reservationService.isTimeout.value) {
-      // Aqui o controller poderia disparar uma navegação global ou um evento
       debugPrint("Timer expirado, modal deve fechar.");
     }
   }
@@ -63,7 +68,6 @@ class ReservationController with ChangeNotifier {
     notifyListeners();
   }
 
-  // Carrega o perfil do usuário para verificar o plano (Regra de Negócio)
   Future<void> _loadUserProfile() async {
     final uid = _auth.currentUser?.uid;
     if (uid != null) {
@@ -82,15 +86,12 @@ class ReservationController with ChangeNotifier {
   Future<bool> handleReservation(String movieTitle) async {
     if (_selectedTime == null) return false;
 
-    // 1. Determina o tipo de ticket
+    _reservationService.cancelTimer();
+
     final String ticketType = hasActivePlan
         ? 'Plano Assinatura'
         : 'Reserva Normal';
 
-    // 2. Cancela o timer antes da chamada de rede
-    _reservationService.cancelTimer();
-
-    // 3. Chama a lógica de salvamento
     final success = await _ticketController.reserveTicket(
       movieTitle: movieTitle,
       sessionDate: DateTime.now(),
@@ -99,7 +100,6 @@ class ReservationController with ChangeNotifier {
     );
 
     if (!success) {
-      // Se falhar, reinicia o timer para dar mais uma chance
       _reservationService.startTimer();
     }
     return success;
