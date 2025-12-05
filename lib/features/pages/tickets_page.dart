@@ -23,7 +23,7 @@ class TicketsPage extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: StreamBuilder<List<TicketModel>>(
         // 2. Escuta o fluxo de dados do Firestore em tempo real
-        stream: ticketController.allUserTicketsStream,
+        stream: ticketController.approvedTicketsStream,
         builder: (context, snapshot) {
           // --- ESTADO: CARREGANDO ---
           if (snapshot.connectionState == ConnectionState.waiting) {

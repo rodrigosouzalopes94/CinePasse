@@ -6,16 +6,18 @@ class TicketService {
 
   // 1. Criar um novo Ticket (Reserva)
   Future<void> createTicket(TicketModel ticket) async {
-    // Usamos o .doc() para gerar um ID automático ou usamos o ID do ticket se já existir
+    // Adiciona o novo ticket à coleção 'tickets'
     await _firestore.collection('tickets').add(ticket.toMap());
   }
 
   // 2. Escutar os Tickets de um Usuário (Stream em Tempo Real)
   Stream<List<TicketModel>> getUserTicketsStream(String userId) {
+    // 🎯 A coleção é 'tickets'
     return _firestore
         .collection('tickets')
         .where('usuarioId', isEqualTo: userId)
-        .orderBy('dataCriacao', descending: true) // Mais recentes primeiro
+        // O ORDER BY exige o índice composto que você precisa criar
+        .orderBy('dataCriacao', descending: true)
         .snapshots()
         .map((snapshot) {
           return snapshot.docs.map((doc) {
