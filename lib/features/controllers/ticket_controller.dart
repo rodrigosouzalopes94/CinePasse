@@ -2,7 +2,8 @@ import 'package:cine_passe_app/features/services/ticket_service.dart';
 import 'package:cine_passe_app/models/ticket_model.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:provider/provider.dart'; // ✅ Import de pacote externo
+import 'package:rxdart/rxdart.dart'; // ✅ Import de pacote externo
 
 class TicketController with ChangeNotifier {
   final TicketService _service = TicketService();
@@ -10,15 +11,25 @@ class TicketController with ChangeNotifier {
 
   bool _isLoading = false;
   String? _errorMessage;
+  String? _successMessage;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  String? get successMessage => _successMessage;
 
   void setErrorMessage(String? message) {
     _errorMessage = message;
+    _successMessage = null;
     notifyListeners();
   }
 
+  void clearMessages() {
+    _errorMessage = null;
+    _successMessage = null;
+    notifyListeners();
+  }
+
+  // 1. Método para criar uma reserva (chamado pela ReservationModal)
   Future<bool> reserveTicket({
     required String movieTitle,
     required DateTime sessionDate,
@@ -33,6 +44,7 @@ class TicketController with ChangeNotifier {
 
     _isLoading = true;
     _errorMessage = null;
+    _successMessage = null;
     notifyListeners();
 
     try {
@@ -52,41 +64,49 @@ class TicketController with ChangeNotifier {
 
       await _service.createTicket(newTicket);
 
+      _successMessage = "Reserva enviada com sucesso! Aguardando aprovação.";
+
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
       _isLoading = false;
+      // 🎯 Aqui, removemos a dependência do tipo de exceção (para o caso de conflito)
       setErrorMessage("Erro ao reservar: ${e.toString()}");
       return false;
     }
   }
 
   // -------------------------------------------------------------------
-  // LÓGICA DE STREAMS DE FILTRAGEM (Validação da Lógica de Exibição)
+  // 2. STREAMS DE FILTRAGEM (Lógica de Exibição)
   // -------------------------------------------------------------------
 
-  // 1. Stream Base: Retorna TODOS os tickets do usuário (Base para filtros)
-  // Este é o método que executa a QUERY com o índice composto.
+  // Stream Base: Retorna TODOS os tickets do usuário
   Stream<List<TicketModel>> get allUserTicketsStream {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return const Stream.empty();
     return _service.getUserTicketsStream(userId);
   }
 
-  // 2. 🚀 LISTA APROVADA: Retorna APENAS tickets APROVADOS (Voucher Válido)
-  // Use este getter na TicketsPage para ver os bilhetes liberados.
+  // Lista Aprovada: Retorna APENAS tickets APROVADOS (Voucher Válido)
   Stream<List<TicketModel>> get approvedTicketsStream {
-    // Usa o .map para processar a lista e filtrar pelo Enum APROVADO
+    // 🎯 O Dart consegue fazer .map em streams nativas se a dependência do rxdart for resolvida
     return allUserTicketsStream.map((tickets) {
       return tickets.where((t) => t.status == TicketStatus.approved).toList();
     });
   }
 
-  // 3. LISTA DE PENDENTES (Para a aba de revisão)
+  // Lista de Pendentes (Para o histórico ou aba de revisão)
   Stream<List<TicketModel>> get pendingTicketsStream {
     return allUserTicketsStream.map((tickets) {
       return tickets.where((t) => t.status == TicketStatus.pending).toList();
+    });
+  }
+
+  // Lista de Rejeitados (Para o histórico)
+  Stream<List<TicketModel>> get rejectedTicketsStream {
+    return allUserTicketsStream.map((tickets) {
+      return tickets.where((t) => t.status == TicketStatus.rejected).toList();
     });
   }
 }

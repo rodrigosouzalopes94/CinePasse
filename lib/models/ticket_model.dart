@@ -5,20 +5,18 @@ enum TicketStatus { pending, approved, rejected }
 
 class TicketModel {
   final String ticketId;
-  final String usuarioId; // CRÍTICO: ID do usuário (Auth UID)
+  final String usuarioId;
 
-  // Informações do Voucher (Lidas do Firestore)
   final String movieTitle;
   final String sessionTime;
 
-  final String code; // Código de compra
+  final String code;
   final DateTime sessionDate;
 
-  final TicketStatus status; // Status de Aprovação
-  final String ticketType; // Reserva Normal vs Plano Assinatura
+  final TicketStatus status;
+  final String ticketType;
   final String? qrCodeUrl;
 
-  // 1. Construtor
   const TicketModel({
     required this.ticketId,
     required this.usuarioId,
@@ -31,26 +29,30 @@ class TicketModel {
     this.qrCodeUrl,
   });
 
-  // 2. Converte DO App PARA o Firebase (Criação de Ticket)
+  // ============================================
+  // 1. ENVIO PARA O FIRESTORE
+  // ============================================
   Map<String, dynamic> toMap() {
     return {
       'usuarioId': usuarioId,
       'movieTitle': movieTitle,
       'sessionTime': sessionTime,
       'codigoCompra': code,
-      // Salva a data como Timestamp do Firestore
       'dataSessao': Timestamp.fromDate(sessionDate),
-      // Converte o Enum para String ('Pendente', 'Aprovado', 'Rejeitado')
-      'statusAprovacao': status.name == 'approved'
+      'statusAprovacao': status == TicketStatus.approved
           ? 'Aprovado'
-          : (status.name == 'rejected' ? 'Rejeitado' : 'Pendente'),
+          : status == TicketStatus.rejected
+          ? 'Rejeitado'
+          : 'Pendente',
       'tipoReserva': ticketType,
       'qrCodeUrl': qrCodeUrl ?? 'N/A',
       'dataCriacao': FieldValue.serverTimestamp(),
     };
   }
 
-  // 3. Converte DO Firebase PARA o App (Leitura de Ticket)
+  // ============================================
+  // 2. LEITURA DO FIRESTORE
+  // ============================================
   factory TicketModel.fromMap(Map<String, dynamic> data, String documentId) {
     return TicketModel(
       ticketId: documentId,
@@ -58,24 +60,34 @@ class TicketModel {
       movieTitle: data['movieTitle'] ?? '',
       sessionTime: data['sessionTime'] ?? '',
       code: data['codigoCompra'] ?? '',
-      // Converte o Timestamp do Firestore de volta para DateTime
       sessionDate: (data['dataSessao'] is Timestamp)
           ? (data['dataSessao'] as Timestamp).toDate()
           : DateTime.now(),
-      // Converte a String do Firestore de volta para o Enum
       status: _mapStatus(data['statusAprovacao']),
       ticketType: data['tipoReserva'] ?? 'Reserva Normal',
       qrCodeUrl: data['qrCodeUrl'],
     );
   }
 
-  // Helper para conversão de String (Firestore) para Enum (Dart)
+  // ============================================
+  // 3. MAPEAMENTO ROBUSTO DE STATUS 🔥
+  // ============================================
   static TicketStatus _mapStatus(String? status) {
-    switch (status) {
-      case 'Aprovado':
+    if (status == null) return TicketStatus.pending;
+
+    final normalized = status.trim().toLowerCase();
+
+    switch (normalized) {
+      case 'aprovado':
+      case 'approved':
         return TicketStatus.approved;
-      case 'Rejeitado':
+
+      case 'rejeitado':
+      case 'rejected':
         return TicketStatus.rejected;
+
+      case 'pendente':
+      case 'pending':
       default:
         return TicketStatus.pending;
     }
