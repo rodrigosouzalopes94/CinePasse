@@ -20,7 +20,7 @@ class UserModel {
   final Timestamp? planoVenceEm;
   final bool isAdmin;
 
-  // 2. Construtor (Adicionando os novos campos)
+  // 2. Construtor
   const UserModel({
     this.uid,
     required this.nome,
@@ -32,6 +32,29 @@ class UserModel {
     this.isAdmin = false,
   });
 
+  // 🚀 MÉTODO ESSENCIAL: Permite copiar o objeto com novos valores (imutabilidade)
+  UserModel copyWith({
+    String? uid,
+    String? nome,
+    String? cpf,
+    String? email,
+    int? idade,
+    String? planoAtual,
+    Timestamp? planoVenceEm,
+    bool? isAdmin,
+  }) {
+    return UserModel(
+      uid: uid ?? this.uid,
+      nome: nome ?? this.nome,
+      cpf: cpf ?? this.cpf,
+      email: email ?? this.email,
+      idade: idade ?? this.idade,
+      planoAtual: planoAtual ?? this.planoAtual,
+      planoVenceEm: planoVenceEm ?? this.planoVenceEm,
+      isAdmin: isAdmin ?? this.isAdmin,
+    );
+  }
+
   // 3. toMap (Prepara os dados para salvar no Firestore)
   Map<String, dynamic> toMap() {
     return {
@@ -42,7 +65,8 @@ class UserModel {
       'planoAtual': planoAtual, // Salva o nome do plano (string)
       'planoVenceEm': planoVenceEm,
       'isAdmin': isAdmin,
-      'dataRegistro': FieldValue.serverTimestamp(),
+      // ⚠️ CORREÇÃO: Removido dataRegistro para evitar erro de 'FieldValue'
+      // pois toMap é usado no update.
     };
   }
 
@@ -55,9 +79,9 @@ class UserModel {
       email: data['email'] ?? '',
       idade:
           (data['idade'] is int
-              ? data['idade']
-              : int.tryParse(data['idade'].toString())) ??
-          0,
+                  ? data['idade']
+                  : int.tryParse(data['idade'].toString())) ??
+              0,
 
       // ✅ Corrigido: Recuperando o plano e validade
       planoAtual: data['planoAtual'] ?? 'Nenhum',

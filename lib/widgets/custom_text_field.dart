@@ -9,6 +9,9 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final String? initialValue;
   final int maxLines;
+  // ✅ CORREÇÃO: Adicionado o parâmetro 'readOnly' com valor padrão 'false'
+  final bool readOnly; 
+  final TextEditingController? controller; // Adicionado controller
 
   const CustomTextField({
     super.key,
@@ -20,6 +23,10 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.initialValue,
     this.maxLines = 1,
+    // ✅ Tornamos opcional:
+    this.readOnly = false, 
+    // Adicionado controller para uso na ProfilePage
+    this.controller,
   });
 
   @override
@@ -28,58 +35,70 @@ class CustomTextField extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Mapeamento das classes CSS: .login-input / .review-textarea
-    final Color fillColor = isDarkMode ? const Color(0xFF333333) : const Color(0xFFE5E7EB); // #333 ou #e5e7eb
-    final Color borderColor = isDarkMode ? const Color(0xFF444444) : const Color(0xFFD1D5DB); // #444 ou #d1d5db
-    final Color textColor = isDarkMode ? const Color(0xFFF5F5F5) : const Color(0xFF111827); // #F5F5F5 ou #111827
-    final Color labelColor = isDarkMode ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280); // Cor cinza padrão para o label
+    final Color fillColor = isDarkMode ? const Color(0xFF333333) : const Color(0xFFE5E7EB); 
+    final Color borderColor = isDarkMode ? const Color(0xFF444444) : const Color(0xFFD1D5DB);
+    final Color textColor = isDarkMode ? const Color(0xFFF5F5F5) : const Color(0xFF111827);
+    final Color labelColor = isDarkMode ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+
+    // Corrigindo a cor de fundo se for 'readOnly'
+    final effectiveFillColor = readOnly 
+        ? (isDarkMode ? const Color(0xFF252525) : const Color(0xFFF3F4F6)) 
+        : fillColor;
 
     return TextFormField(
       initialValue: initialValue,
-      controller: null, // Pode ser adicionado se precisar de um controlador externo
+      // ✅ Usando o controller
+      controller: controller, 
       onChanged: onChanged,
       validator: validator,
       keyboardType: keyboardType,
       maxLines: maxLines,
       obscureText: isPassword,
-
-      style: TextStyle(color: textColor), // Cor do texto digitado
-
+      // ✅ Usando a nova propriedade
+      readOnly: readOnly, 
+      
+      style: TextStyle(
+        color: readOnly ? labelColor : textColor,
+        fontWeight: readOnly ? FontWeight.w500 : FontWeight.normal,
+      ), 
+      
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: labelColor), // Cor do label
+        labelStyle: TextStyle(color: labelColor),
         prefixIcon: icon != null ? Icon(icon, color: labelColor) : null,
-
+        
         // Estilo do Fundo e Borda
         filled: true,
-        fillColor: fillColor,
-
+        fillColor: effectiveFillColor, // Usando a cor ajustada
+        
         contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-
+        
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
           borderSide: BorderSide(color: borderColor),
         ),
-
+        
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(color: borderColor), // Borda no estado normal
+          borderSide: BorderSide(color: borderColor),
         ),
-
+        
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
+          // Borda primária quando focado
           borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary, // Borda primária quando focado
+            color: Theme.of(context).colorScheme.primary, 
             width: 2.0,
           ),
         ),
-
+        
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
           borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
         ),
 
         // Cor do placeholder/hint text
-        hintStyle: TextStyle(color: labelColor.withValues(alpha: 0.7)),
+        hintStyle: TextStyle(color: labelColor.withOpacity(0.7)),
       ),
     );
   }

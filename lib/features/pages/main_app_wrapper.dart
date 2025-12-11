@@ -5,9 +5,7 @@ import 'package:cine_passe_app/features/controllers/theme_controller.dart';
 import 'package:cine_passe_app/features/pages/home_page.dart';
 import 'package:cine_passe_app/features/pages/plans_page.dart';
 import 'package:cine_passe_app/features/pages/tickets_page.dart';
-// Ajuste os caminhos de import conforme sua estrutura real
-// Se os arquivos estiverem em lib/pages/, use o caminho correspondente
-// ✅ Import da PlansPage
+import 'package:cine_passe_app/features/pages/profile_page.dart'; 
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -74,6 +72,7 @@ class BottomNavBar extends StatelessWidget {
               Colors.transparent, // Transparente para usar a cor do Container
           elevation: 0, // Remove a sombra padrão do Material
           type: BottomNavigationBarType.fixed, // Evita animação de "shifting"
+          
           // Tamanho das fontes
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
@@ -143,6 +142,15 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
       _currentIndex = tabToIndex[TabItem.home]!;
     });
   }
+  
+  // ✅ NOVO MÉTODO: Navega para a página de Edição de Perfil
+  void _navigateToProfile() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ProfilePage(), // ✅ Chama a nova página
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,12 +178,13 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
         telaAtual: title,
         onBackPress: _currentTab != TabItem.home ? _handleBackPress : null,
         onThemeTogglePress: themeController.toggleTheme,
-        onUserMenuPress: () => debugPrint('Menu Usuário'),
+        
+        // 🚀 CORREÇÃO CRÍTICA: Chama a navegação para a ProfilePage
+        onUserMenuPress: _navigateToProfile, 
 
         // ✅ Implementação do Logout
         onLogoutPress: () {
           // Chama o logout do AuthController
-          // O listener no main.dart vai detectar a mudança e redirecionar para Login
           context.read<AuthController>().logout();
         },
 

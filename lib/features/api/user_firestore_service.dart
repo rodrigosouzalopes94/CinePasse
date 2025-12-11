@@ -4,21 +4,41 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserFirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Salvar dados do usuário ao registrar
+  // ---------------------------------------------------------------------------
+  // 1. SALVAR DADOS DO USUÁRIO (no Registro)
+  // ---------------------------------------------------------------------------
   Future<void> saveUser(UserModel user) async {
     if (user.uid == null) throw Exception("UID do usuário é obrigatório");
 
     try {
       await _firestore
           .collection('users')
-          .doc(user.uid) // Usa o UID do Auth como ID do documento
+          .doc(user.uid)
           .set(user.toMap());
     } catch (e) {
       throw Exception("Erro ao salvar dados do usuário: $e");
     }
   }
 
-  // Ler dados do usuário (útil para saber o plano atual)
+  // ---------------------------------------------------------------------------
+  // 2. ATUALIZAR PERFIL DO USUÁRIO
+  // ---------------------------------------------------------------------------
+  Future<void> updateUser(UserModel user) async {
+    if (user.uid == null) throw Exception("UID do usuário é obrigatório para atualização.");
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .update(user.toMap());
+    } catch (e) {
+      throw Exception("Erro ao atualizar dados do usuário: $e");
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 3. LER DADOS DO USUÁRIO
+  // ---------------------------------------------------------------------------
   Future<UserModel?> getUser(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
