@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+
 // Widgets
 import 'package:cine_passe_app/widgets/custom_button.dart';
 
@@ -17,12 +18,11 @@ class ReservationModal extends StatelessWidget {
 
   // Método para exibir o feedback de sucesso (AlertDialog)
   void _showSuccessDialog(BuildContext context) {
-    // É importante garantir que o contexto seja válido antes de chamar o pop
-    if (Navigator.canPop(context)) Navigator.pop(context);
-
+    // ✅ Não fazemos mais pop aqui. Apenas abrimos o AlertDialog sobre a tela de fundo.
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      // Usamos um Builder para criar um novo contexto para o AlertDialog
+      builder: (dialogContext) => AlertDialog( 
         title: const Icon(Icons.check_circle, color: Colors.green, size: 60),
         content: const Text(
           'Solicitação de reserva enviada!\n\nSeu voucher está aguardando aprovação na aba "Meus Ingressos".',
@@ -30,9 +30,10 @@ class ReservationModal extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
+            // ✅ Usa o contexto local (dialogContext) para fechar APENAS o AlertDialog
+            onPressed: () => Navigator.pop(dialogContext), 
+            child: const Text('OK')
+          )
         ],
       ),
     );
@@ -41,29 +42,35 @@ class ReservationModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    // ⚠️ INJEÇÃO LOCAL DO CONTROLLER E SERVICE
-    // Isso garante que a instância do timer seja criada e destruída apenas com o modal
+    
+    // ⚠️ INJEÇÃO LOCAL DO CONTROLLER E SERVICE 
+    // Isso garante que a instância do timer seja criada e destruída apenas com o modal.
     return ChangeNotifierProvider(
       create: (ctx) => ReservationController(
-        ReservationService(),
+        // Passa as dependências (Service e Controller global)
+        // ⚠️ Nota: Assumi o caminho correto dos Services.
+        ReservationService(), 
         ctx.read<TicketController>(),
-      )..initialize(),
-
+      )..initialize(), // Inicializa o timer e carrega o perfil
+      
       child: Consumer<ReservationController>(
         builder: (ctx, controller, child) {
-          final bool hasActivePlan = controller.hasActivePlan;
-
           // 1. Listener de Timeout: Se o timer zerar, fecha o modal
           if (controller.isTimeout.value && Navigator.canPop(ctx)) {
-            // O addPostFrameCallback é usado para garantir que o pop ocorra após o frame ser construído
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pop(ctx);
-            });
+             // Garante que o pop ocorra após o frame ser construído
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+               // Fecha o modal se o tempo esgotar
+               Navigator.pop(ctx); 
+               // Feedback de timeout (opcional, aparece na tela principal)
+               ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(content: Text('Tempo de reserva esgotado.'), backgroundColor: Colors.red),
+               );
+             });
           }
 
           return Container(
             padding: const EdgeInsets.all(24.0),
+            // Adiciona decoração para o BottomSheet
             decoration: BoxDecoration(
               color: theme.scaffoldBackgroundColor,
               borderRadius: const BorderRadius.vertical(
@@ -77,37 +84,42 @@ class ReservationModal extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header com Timer
-                _buildTimerHeader(theme, controller),
-                const SizedBox(height: 24),
+            // O Modal deve ter uma altura limitada, mas expansível
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header com Timer
+                  _buildTimerHeader(theme, controller),
+                  const SizedBox(height: 24),
 
-                _buildMovieDetails(theme, controller),
+                  _buildMovieDetails(theme, controller),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // Conteúdo Principal (Horários e Botão)
-                // ✅ Usando o getter corrigido: controller.isLoadingProfile
-                if (controller.isLoadingProfile)
-                  const Center(child: CircularProgressIndicator())
-                else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTimeSelection(theme, controller),
+                  // Conteúdo Principal (Horários e Botão)
+                  if (controller.isLoadingProfile) 
+                    const Center(child: Padding(
+                      padding: EdgeInsets.all(40.0),
+                      child: CircularProgressIndicator(),
+                    ))
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTimeSelection(theme, controller),
+                        
+                        const SizedBox(height: 32),
+                        const Divider(),
+                        const SizedBox(height: 16),
 
-                      const SizedBox(height: 32),
-                      const Divider(),
-                      const SizedBox(height: 16),
-
-                      // ✅ CORREÇÃO: Passamos o context E o movie
-                      _buildSummaryAndButton(theme, controller, ctx, movie),
-                    ],
-                  ),
-              ],
+                        // ✅ Passamos o contexto externo (ctx) e o movie
+                        _buildSummaryAndButton(theme, controller, ctx, movie), 
+                      ],
+                    ),
+                ],
+              ),
             ),
           );
         },
@@ -122,31 +134,25 @@ class ReservationModal extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: controller.remainingSeconds,
       builder: (context, remainingSeconds, child) {
-        final String formattedTime =
-            '${(remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(remainingSeconds % 60).toString().padLeft(2, '0')}';
+        final String formattedTime = '${(remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(remainingSeconds % 60).toString().padLeft(2, '0')}';
         final bool isCritical = remainingSeconds < 60;
-
+        
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Reserva de Ingresso',
-              style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey),
-            ),
+            Text('Reserva de Ingresso', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey)),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: isCritical
-                    ? Colors.red.withOpacity(0.1)
-                    : theme.primaryColor.withOpacity(0.1),
+                color: isCritical ? Colors.red.withOpacity(0.1) : theme.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 children: [
                   Icon(
-                    Icons.timer_outlined,
-                    size: 16,
-                    color: isCritical ? Colors.red : theme.primaryColor,
+                    Icons.timer_outlined, 
+                    size: 16, 
+                    color: isCritical ? Colors.red : theme.primaryColor
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -169,7 +175,7 @@ class ReservationModal extends StatelessWidget {
   Widget _buildMovieDetails(ThemeData theme, ReservationController controller) {
     final bool hasActivePlan = controller.hasActivePlan;
     final String userPlan = controller.userPlan;
-
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -180,8 +186,7 @@ class ReservationModal extends StatelessWidget {
             width: 80,
             height: 120,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-                Container(width: 80, height: 120, color: Colors.grey),
+            errorBuilder: (_,__,___) => Container(width: 80, height: 120, color: Colors.grey),
           ),
         ),
         const SizedBox(width: 16),
@@ -189,15 +194,7 @@ class ReservationModal extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                movie.titulo,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(movie.titulo, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, fontSize: 20), maxLines: 2, overflow: TextOverflow.ellipsis),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -211,9 +208,7 @@ class ReservationModal extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: hasActivePlan
-                      ? Colors.purple.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.1),
+                  color: hasActivePlan ? Colors.purple.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(
                     color: hasActivePlan ? Colors.purple : Colors.grey,
@@ -234,37 +229,25 @@ class ReservationModal extends StatelessWidget {
       ],
     );
   }
-
-  Widget _buildTimeSelection(
-    ThemeData theme,
-    ReservationController controller,
-  ) {
+  
+  Widget _buildTimeSelection(ThemeData theme, ReservationController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Horário da Sessão',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text('Horário da Sessão', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
           children: controller.sessionTimes.map((time) {
-            // ✅ Usando o getter corrigido: controller.selectedTime
-            final isSelected = controller.selectedTime == time;
+            final isSelected = controller.selectedTime == time; 
             return ChoiceChip(
               label: Text(time),
               selected: isSelected,
-              onSelected: (selected) =>
-                  controller.setSelectedTime(selected ? time : null),
+              onSelected: (selected) => controller.setSelectedTime(selected ? time : null),
               selectedColor: theme.colorScheme.primary,
               backgroundColor: theme.cardColor,
               labelStyle: TextStyle(
-                color: isSelected
-                    ? Colors.white
-                    : theme.textTheme.bodyMedium?.color,
+                color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             );
@@ -273,16 +256,11 @@ class ReservationModal extends StatelessWidget {
       ],
     );
   }
-
-  // ✅ CORREÇÃO: Recebe o context e o MovieModel
-  Widget _buildSummaryAndButton(
-    ThemeData theme,
-    ReservationController controller,
-    BuildContext context,
-    MovieModel movie,
-  ) {
+  
+  // ✅ Recebe o context externo e o MovieModel
+  Widget _buildSummaryAndButton(ThemeData theme, ReservationController controller, BuildContext context, MovieModel movie) {
     final bool hasActivePlan = controller.hasActivePlan;
-
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -290,33 +268,25 @@ class ReservationModal extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Total:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(
               hasActivePlan ? 'R\$ 0,00' : 'R\$ 25,00',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
-                color: hasActivePlan
-                    ? Colors.green
-                    : theme.textTheme.bodyLarge?.color,
+                color: hasActivePlan ? Colors.green : theme.textTheme.bodyLarge?.color,
               ),
             ),
           ],
         ),
-
+        
         // Benefício
         if (hasActivePlan)
           const Padding(
             padding: EdgeInsets.only(top: 4),
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text(
-                'Benefício aplicado: Ingresso Gratuito',
-                style: TextStyle(color: Colors.green, fontSize: 12),
-              ),
+              child: Text('Benefício aplicado: Ingresso Gratuito', style: TextStyle(color: Colors.green, fontSize: 12)),
             ),
           ),
 
@@ -324,20 +294,32 @@ class ReservationModal extends StatelessWidget {
 
         // Botão de Ação
         CustomButton(
-          text: hasActivePlan
-              ? 'CONFIRMAR RESERVA (R\$ 0,00)'
-              : 'IR PARA PAGAMENTO (R\$ 25,00)',
+          text: hasActivePlan ? 'CONFIRMAR RESERVA (R\$ 0,00)' : 'IR PARA PAGAMENTO (R\$ 25,00)',
           // ✅ Usa o getter público controller.ticketController.isLoading
-          isLoading: controller.ticketController.isLoading,
-          onPressed: controller.selectedTime == null
-              ? null
-              : () async {
-                  // ✅ CHAMADA CORRIGIDA: Passando o movie.titulo para o controller
-                  final success = await controller.handleReservation(
-                    movie.titulo,
+          isLoading: controller.ticketController.isLoading, 
+          onPressed: controller.selectedTime == null 
+            ? null 
+            : () async {
+                // 1. Tenta fazer a reserva
+                final success = await controller.handleReservation(movie.titulo);
+                
+                // 2. Se a reserva for bem-sucedida
+                if (success) {
+                  // FECHA O MODAL PRINCIPAL (BottomSheet)
+                  // ⚠️ CORREÇÃO: Usar o contexto correto (contexto do builder Consumer)
+                  if (Navigator.canPop(context)) Navigator.pop(context); 
+                  
+                  // Exibe o Diálogo de Sucesso (usa o contexto que está abaixo do modal)
+                  _showSuccessDialog(context); 
+                } else if (context.mounted) {
+                  // Se falhou e há mensagem de erro (do TicketController)
+                  final errorMessage = controller.ticketController.errorMessage;
+                  // Garante que o modal principal feche em caso de erro, ou apenas exibe o SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(content: Text('Falha na Reserva: $errorMessage'), backgroundColor: Colors.red),
                   );
-                  if (success) _showSuccessDialog(context);
-                },
+                }
+              },
         ),
       ],
     );
