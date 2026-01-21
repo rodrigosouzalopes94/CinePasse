@@ -1,90 +1,80 @@
-🎬 CinePasse App
+Plataforma CinePasse: Documentação de Lançamento
 
-CinePasse é uma aplicação mobile desenvolvida em Flutter que revoluciona a experiência de ir ao cinema. Focado em um modelo de assinatura (SaaS), o app permite que usuários assinem planos mensais para obter ingressos, reservem assentos e gerenciem seus vouchers digitalmente.
+Propósito: Apresentar as funcionalidades e as regras de negócio implementadas no Aplicativo Móvel e no Painel de Gestão (Backoffice), com foco na experiência do usuário e na eficiência operacional.
 
-📱 Telas e Funcionalidades
+Desenvolvimento: Aplicativo Mobile (Flutter) e Gestão Web (React)
+Base de Dados: Google Firebase/Firestore
 
-Catálogo de Filmes
+1. Regras de Negócio e Planos de Assinatura (O Coração do App)
 
-Planos de Assinatura
+O sistema CinePasse opera sob um modelo de assinatura, onde os benefícios são aplicados automaticamente na reserva de ingressos.
 
-Meus Ingressos
+1.1. Detalhamento dos Planos
 
+|
 
+| Plano | Preço (Exemplo) | Benefício na Reserva | Regra de Uso |
+| Passe Premium | R$ 49,90/mês | Ingresso Gratuito. O usuário não paga nada na reserva. | Válido para o titular, 1 ingresso por sessão. |
+| Plano Família | R$ 89,90/mês | Ingresso Gratuito. O usuário não paga nada na reserva. | Válido para o titular e até 3 membros adicionais (total de 4 usuários). |
+| Básico (Gratuito) | R$ 0,00 | Pagamento Avulso (R$ 25,00). O usuário deve pagar o valor do ingresso na reserva. | Não possui limite de ingressos, mas requer pagamento por uso. |
 
-Autenticação Completa: Login, Cadastro e Recuperação de Senha via E-mail (Firebase Auth).
+1.2. Processo de Reserva (Regra Crítica)
 
-Catálogo em Tempo Real: Listagem de filmes atualizada instantaneamente (Firestore).
+Todo ingresso, seja ele pago (Avulso) ou gratuito (Plano), segue o mesmo fluxo para garantir a integridade do assento:
 
-Sistema de Assinaturas: Planos "Premium" e "Família" com benefícios exclusivos.
+Reserva (App Mobile): O usuário seleciona o filme e o horário, e o sistema registra a solicitação com o status "Pendente".
 
-Checkout Simulado: Fluxo de pagamento com validação de Cartão de Crédito e Pix.
+Verificação (Backoffice): O Painel Administrativo recebe a notificação em tempo real. O Admin verifica a validade do plano ou a confirmação do pagamento avulso.
 
-Gestão de Vouchers: Geração de QR Code e acompanhamento do status de aprovação (Pendente/Aprovado).
+Aprovação: O Admin altera o status para "Aprovado".
 
-Temas: Suporte completo a Dark Mode e Light Mode.
+Voucher Imediato: O ingresso aparece na aba "Meus Ingressos" do usuário, pronto para ser usado.
 
-🛠️ Tecnologias Utilizadas
+2. Aplicativo Mobile (Flutter) - Foco no Usuário
 
-Frontend: Flutter (Dart)
+O aplicativo foi desenvolvido com foco em uma experiência de usuário rápida e intuitiva.
 
-Backend as a Service: Firebase
+2.1. Funcionalidades de Acesso e Perfil
 
-Authentication: Gestão de identidade.
+| Módulo | O que o Usuário Faz | Detalhe de Segurança/Uso |
+| Login/Cadastro | Cria e acessa sua conta com segurança de nível Firebase. | Os dados complementares (CPF, Idade) são salvos no Firestore, mas o acesso à conta é via Firebase Authentication. |
+| Edição de Perfil | O usuário pode corrigir seu Nome e Idade. | A alteração do Plano é feita na aba "Planos" (Checkout). O CPF e Email são mantidos como read-only para proteger a identidade. |
+| Alternar Tema | Muda o aplicativo para o Modo Escuro ou Claro com um clique. | O tema é persistido localmente para manter a preferência do usuário. |
 
-Cloud Firestore: Banco de dados NoSQL em tempo real.
+2.2. Funcionalidades de Conteúdo e Vouchers
 
-Gerenciamento de Estado: Provider (ChangeNotifier).
+| Módulo | O que o Usuário Vê | Como Funciona |
+| Catálogo Home | Vê todos os filmes "Em Cartaz" em tempo real. | O aplicativo recebe as informações diretamente da coleção filmes do Firestore via Stream. |
+| Reserva com Timer | Ao iniciar a reserva, um cronômetro de 5 minutos começa a contar. | Isso evita que assentos fiquem bloqueados indefinidamente por usuários indecisos. Se o tempo esgotar, a reserva é cancelada (o modal fecha). |
+| Meus Ingressos | Vê todos os vouchers comprados ou reservados. | Utiliza um filtro em tempo real: Apenas ingressos com status "Aprovado" são exibidos para evitar confusão no momento da entrada no cinema. |
 
-Arquitetura: Feature-First / Clean Architecture simplificada.
+3. Painel Administrativo (React/Web) - Foco Operacional
 
-🚀 Como Rodar o Projeto
+O Backoffice é o centro de controle para a equipe de gestão, garantindo a rápida aprovação de vendas e a atualização do catálogo.
 
-Pré-requisitos
+3.1. Governança e Acesso
 
-Flutter SDK instalado.
+| Módulo | Benefício Operacional | Segurança |
+| Login Admin | Acesso restrito apenas a contas com permissão de Administrador (flag isAdmin: true no Firebase). | Bloqueado por Regras de Segurança do Firestore para proteger dados sensíveis. |
+| Dashboard | Visão instantânea das métricas críticas (Total de Vendas, Tickets Pendentes e Catálogo Ativo). | Permite tomada de decisão rápida sobre a saúde das operações. |
+| Gestão de Usuários | A equipe pode consultar perfis, CPF, Idade, e mudar o plano de um usuário manualmente (Upgrade/Downgrade forçado). | Essencial para o suporte e resolução de problemas de cobrança/benefícios. |
 
-Emulador Android/iOS ou dispositivo físico configurado.
+3.2. Controle de Tickets e Catálogo
 
-Conta no Firebase.
+| Módulo | O que a Equipe Faz | Agilidade |
+| Validação de Tickets | Listagem instantânea de todos os tickets Pendentes. A equipe clica em Aprovar ou Rejeitar. | A aprovação é imediata, e o voucher aparece no celular do cliente em tempo real (segundos) devido ao uso de Streams do Firestore. |
+| Catálogo de Filmes | Cria, edita e exclui filmes. | Garante que o App Mobile esteja sempre atualizado sem a necessidade de intervenção do desenvolvimento. |
 
-Passo a Passo
+4. Segurança e Integridade (Garantia de 100% de Funcionamento)
 
-Clone o repositório:
+Para assegurar que o App e o Backoffice funcionem corretamente no ambiente de produção:
 
-git clone [https://github.com/SEU_USUARIO/cine_passe_app.git](https://github.com/SEU_USUARIO/cine_passe_app.git)
-cd cine_passe_app
+Chaves SHA-1: As chaves de assinatura do aplicativo (tanto a chave de Upload quanto a chave oficial de Assinatura do Google Play) foram registradas no Firebase Console. Isso é crucial para garantir que o Login e as Notificações funcionem após o download na Play Store.
 
+Regras de Segurança (Firestore Rules):
 
-Instale as dependências:
+Anti-Fraude: A regra central impede que o usuário crie um ticket com status "Aprovado". Todo ticket deve ser criado como "Pendente", forçando a validação humana ou de sistema.
 
-flutter pub get
+Acesso de Admin: Apenas a conta de Admin tem permissão para mudar o status de um ticket e modificar o catálogo de filmes.
 
-
-Configuração do Firebase:
-
-Este projeto depende do arquivo firebase_options.dart.
-
-Siga as instruções no arquivo FIREBASE_SETUP.md para configurar seu ambiente.
-
-Execute o App:
-
-flutter run
-
-
-📂 Estrutura do Projeto
-
-O projeto segue uma estrutura organizada por funcionalidades (features):
-
-lib/
-├── api/            # Comunicação direta com Firestore
-├── core/           # Modelos, Temas e Utilitários globais
-├── features/       # Módulos do App (Auth, Movies, Plans, Tickets)
-├── services/       # Serviços de Lógica (AuthService)
-└── widgets/        # Componentes visuais reutilizáveis
-
-
-🤝 Contribuição
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir Issues ou enviar Pull Requests.
-
+Este modelo garante um sistema ágil, seguro e com controle total sobre as regras de negócio no Backoffice.
