@@ -112,43 +112,42 @@ Esse modelo elimina fraudes e garante validação centralizada.
 
 ### 📱 Telas do App Mobile
 
+> As imagens foram redimensionadas para melhor leitura no navegador.
+
 #### 🔐 Autenticação
 
-![Confirm](screenshots/confirm.jpeg)
-![Criar Conta](screenshots/createaccount.jpeg)
+<p align="center">
+  <img src="screenshots/confirm.jpeg" width="250" />
+  <img src="screenshots/createaccount.jpeg" width="250" />
+</p>
 
 #### 🏠 Navegação e Conteúdo
 
-![Home](screenshots/home.jpeg)
-![Filme](screenshots/movie.jpeg)
-![Reserva](screenshots/reserva.jpeg)
-![Ticket](screenshots/ticket.jpeg)
+<p align="center">
+  <img src="screenshots/home.jpeg" width="250" />
+  <img src="screenshots/movie.jpeg" width="250" />
+  <img src="screenshots/reserva.jpeg" width="250" />
+  <img src="screenshots/ticket.jpeg" width="250" />
+</p>
 
 #### 💳 Planos e Pagamentos
 
-![Plano R$49,90](screenshots/plan49.jpeg)
-![Plano R$89,90](screenshots/plan89.jpeg)
-![Pagamento](screenshots/payment.jpeg)
-![PIX](screenshots/pix.jpeg)
+<p align="center">
+  <img src="screenshots/plan49.jpeg" width="250" />
+  <img src="screenshots/plan89.jpeg" width="250" />
+  <img src="screenshots/payment.jpeg" width="250" />
+  <img src="screenshots/pix.jpeg" width="250" />
+</p>
 
 #### 👤 Perfil e Preferências
 
-![Perfil](screenshots/profile.jpeg)
-![Modo Escuro](screenshots/darkmode.jpeg)
+<p align="center">
+  <img src="screenshots/profile.jpeg" width="250" />
+  <img src="screenshots/darkmode.jpeg" width="250" />
+</p>
 
 #### ℹ️ Suporte
 
-![FAQ](screenshots/faq.jpeg)
-
----
-
-## ✅ Conclusão
-
-O **CinePasse** entrega um ecossistema completo e escalável, unindo:
-
-* Experiência fluida para o usuário
-* Controle rigoroso das regras de negócio
-* Atualizações em tempo real
-* Segurança de nível produção
-
-Ideal para operações de cinema baseadas em **assinatura e validação centralizada**.
+<p align="center">
+  <img src="screenshots/faq.jpeg" width="250" />
+</p>
