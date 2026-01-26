@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ReservationController with ChangeNotifier {
-  // Dependências
+  
   final ReservationService _reservationService;
   final UserFirestoreService _userService = UserFirestoreService();
   final TicketController _ticketController;
@@ -14,35 +14,35 @@ class ReservationController with ChangeNotifier {
 
   ReservationController(this._reservationService, this._ticketController);
 
-  // --- ESTADO ---
+  
   UserModel? _userProfile;
-  bool _isLoadingProfile = true; // Estado de carregamento do perfil
+  bool _isLoadingProfile = true; 
   String? _selectedTime;
   final List<String> sessionTimes = ['14:00', '16:30', '19:00', '21:30'];
 
-  // --- GETTERS PÚBLICOS (CORREÇÃO DE ESCOPO) ---
+  
 
-  // ✅ CORRIGIDO: Getter para acessar o TicketController (para isLoading)
+  
   TicketController get ticketController => _ticketController;
 
-  // ✅ CORRIGIDO: Getter para o estado de loading do perfil
+  
   bool get isLoadingProfile => _isLoadingProfile;
 
-  // ✅ CORRIGIDO: Pass-through do Timer (ValueNotifier)
+  
   ValueNotifier<int> get remainingSeconds =>
       _reservationService.remainingSeconds;
   ValueNotifier<bool> get isTimeout => _reservationService.isTimeout;
 
-  // Getter do horário selecionado
+  
   String? get selectedTime => _selectedTime;
 
-  // Lógica de Negócio
+  
   UserModel? get userProfile => _userProfile;
   bool get hasActivePlan =>
       _userProfile?.planoAtual != 'Nenhum' && _userProfile?.planoAtual != null;
   String get userPlan => _userProfile?.planoAtual ?? 'Gratuito';
 
-  // --- MÉTODOS DE CONTROLE ---
+  
 
   void initialize() {
     _reservationService.startTimer();
@@ -82,7 +82,7 @@ class ReservationController with ChangeNotifier {
     notifyListeners();
   }
 
-  // Lógica de Reserva (Chama o TicketController)
+  
   Future<bool> handleReservation(String movieTitle) async {
     if (_selectedTime == null) return false;
 

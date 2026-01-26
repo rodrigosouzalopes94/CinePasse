@@ -9,7 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  // 1. Função para exibir o modal de reserva
+  
   void _showReservationModal(BuildContext context, MovieModel movie) {
     showModalBottomSheet(
       context: context,
@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Instância do serviço para buscar os dados
+    
     final MovieService movieService = MovieService();
 
     return SingleChildScrollView(
@@ -29,10 +29,10 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 1. Hero Banner
+          
           const _HeroBanner(),
 
-          // 2. Movies Grid
+          
           StreamBuilder<List<MovieModel>>(
             stream: movieService.getMoviesStream(),
             builder: (context, snapshot) {
@@ -47,9 +47,9 @@ class HomePage extends StatelessWidget {
 
               return _MoviesGrid(
                 movies: movies,
-                // ✅ Conecta o onReserve do Card à função local
+                
                 onReserve: (movie) => _showReservationModal(context, movie),
-                // ✅ Conecta o onSelectMovie (ir para detalhes)
+                
                 onSelectMovie: (movie) {
                   Navigator.push(
                     context,
@@ -67,9 +67,9 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// -------------------------------------------------------------------
-// WIDGETS AUXILIARES
-// -------------------------------------------------------------------
+
+
+
 
 class _HeroBanner extends StatelessWidget {
   const _HeroBanner();
@@ -125,14 +125,14 @@ class _HeroBanner extends StatelessWidget {
 
 class _MoviesGrid extends StatelessWidget {
   final List<MovieModel> movies;
-  // ✅ CORREÇÃO: Adiciona os callbacks que faltavam
+  
   final Function(MovieModel) onReserve;
   final Function(MovieModel) onSelectMovie;
 
   const _MoviesGrid({
     required this.movies,
-    required this.onReserve, // Adicionado
-    required this.onSelectMovie, // Adicionado
+    required this.onReserve, 
+    required this.onSelectMovie, 
   });
 
   @override
@@ -177,8 +177,8 @@ class _MoviesGrid extends StatelessWidget {
                     return MovieCard(
                       movie: movie,
                       onSelectMovie: () => onSelectMovie(movie),
-                      // Passa o callback para o MovieCard
-                      // O MovieCard espera VoidCallback, então a HomePage já trata o MovieModel no closure
+                      
+                      
                       onReserve: () => onReserve(movie),
                     );
                   },
@@ -189,8 +189,8 @@ class _MoviesGrid extends StatelessWidget {
   }
 }
 
-// --- WIDGETS DE ESTADO ---
-// (Para evitar que o app quebre se o StreamBuilder retornar estados não processados)
+
+
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState();

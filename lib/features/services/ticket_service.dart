@@ -5,13 +5,13 @@ class TicketService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   TicketService() {
-    // 🔥 Desabilita o cache do Firestore para evitar dados antigos
+    
     _firestore.settings = const Settings(persistenceEnabled: false);
   }
 
-  // =====================================================
-  // 1. Criar um ticket no Firestore
-  // =====================================================
+  
+  
+  
   Future<void> createTicket(TicketModel ticket) async {
     try {
       print("📌 Criando ticket...");
@@ -23,9 +23,9 @@ class TicketService {
     }
   }
 
-  // =====================================================
-  // 2. Stream de tickets do usuário (Tempo Real)
-  // =====================================================
+  
+  
+  
   Stream<List<TicketModel>> getUserTicketsStream(String userId) {
     print("📡 Iniciando stream de tickets do usuário: $userId");
 

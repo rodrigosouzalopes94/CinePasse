@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+
 
 import 'package:cine_passe_app/features/controllers/auth_controller.dart';
 import 'package:cine_passe_app/features/controllers/theme_controller.dart';
@@ -10,13 +10,13 @@ import 'package:cine_passe_app/features/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Widgets
+
 import 'package:cine_passe_app/widgets/cine_passe_app_bar.dart';
 
-// Enum para identificar as abas da navegação inferior
+
 enum TabItem { home, tickets, plans }
 
-// Widget da Barra de Navegação Ajustado
+
 class BottomNavBar extends StatelessWidget {
   final TabItem currentTab;
   final Function(TabItem) onSelectTab;
@@ -33,13 +33,13 @@ class BottomNavBar extends StatelessWidget {
     final primaryColor = theme.colorScheme.primary;
     final isDarkMode = theme.brightness == Brightness.dark;
 
-    // Cor de fundo sólida ou semi-transparente para garantir leitura
+    
     final backgroundColor = isDarkMode
         ? const Color(0xFF1C1C1C).withOpacity(0.98)
         : Colors.white.withOpacity(0.98);
 
     return Container(
-      // O Container desenha o fundo e a borda superior
+      
       decoration: BoxDecoration(
         color: backgroundColor,
         border: Border(
@@ -56,24 +56,24 @@ class BottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      // 🚀 SafeArea envolve apenas os ícones/texto
+      
       child: SafeArea(
-        top: false, // Não precisa proteger o topo da barra
+        top: false, 
         child: BottomNavigationBar(
           currentIndex: TabItem.values.indexOf(currentTab),
           onTap: (index) => onSelectTab(TabItem.values[index]),
 
-          // Estilização
+          
           selectedItemColor: primaryColor,
           unselectedItemColor: theme.textTheme.bodyMedium?.color?.withOpacity(
             0.5,
           ),
           backgroundColor:
-              Colors.transparent, // Transparente para usar a cor do Container
-          elevation: 0, // Remove a sombra padrão do Material
-          type: BottomNavigationBarType.fixed, // Evita animação de "shifting"
+              Colors.transparent, 
+          elevation: 0, 
+          type: BottomNavigationBarType.fixed, 
           
-          // Tamanho das fontes
+          
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 12,
@@ -120,11 +120,11 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
     TabItem.plans: 2,
   };
 
-  // ✅ Lista de páginas completa com a PlansPage
+  
   final List<Widget> _pages = [
     const HomePage(),
     const TicketsPage(),
-    const PlansPage(), // ✅ Adicionado aqui
+    const PlansPage(), 
   ];
 
   void _selectTab(TabItem tabItem) {
@@ -143,11 +143,11 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
     });
   }
   
-  // ✅ NOVO MÉTODO: Navega para a página de Edição de Perfil
+  
   void _navigateToProfile() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const ProfilePage(), // ✅ Chama a nova página
+        builder: (context) => const ProfilePage(), 
       ),
     );
   }
@@ -156,7 +156,7 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
 
-    // Mapeamento simples de títulos para o AppBar decidir o logo/texto
+    
     String title;
     switch (_currentTab) {
       case TabItem.home:
@@ -171,7 +171,7 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
     }
 
     return Scaffold(
-      // extendBody: true faz o corpo da página ir até o final da tela (atrás da navbar)
+      
       extendBody: true,
 
       appBar: CinePasseAppBar(
@@ -179,19 +179,19 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
         onBackPress: _currentTab != TabItem.home ? _handleBackPress : null,
         onThemeTogglePress: themeController.toggleTheme,
         
-        // 🚀 CORREÇÃO CRÍTICA: Chama a navegação para a ProfilePage
+        
         onUserMenuPress: _navigateToProfile, 
 
-        // ✅ Implementação do Logout
+        
         onLogoutPress: () {
-          // Chama o logout do AuthController
+          
           context.read<AuthController>().logout();
         },
 
         isDarkMode: themeController.isDarkMode,
       ),
 
-      // O IndexedStack preserva o estado das páginas quando troca de aba
+      
       body: IndexedStack(index: _currentIndex, children: _pages),
 
       bottomNavigationBar: BottomNavBar(

@@ -10,6 +10,6 @@ class ThemeController with ChangeNotifier {
     notifyListeners();
   }
 
-  // Método auxiliar para obter o ThemeMode correto
+  
   ThemeMode get themeMode => _isDarkMode ? ThemeMode.dark : ThemeMode.light;
 }

@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 
-// Widgets
+
 import 'package:cine_passe_app/widgets/custom_button.dart';
 
 class ReservationModal extends StatelessWidget {
@@ -16,12 +16,12 @@ class ReservationModal extends StatelessWidget {
 
   const ReservationModal({super.key, required this.movie});
 
-  // Método para exibir o feedback de sucesso (AlertDialog)
+  
   void _showSuccessDialog(BuildContext context) {
-    // ✅ Não fazemos mais pop aqui. Apenas abrimos o AlertDialog sobre a tela de fundo.
+    
     showDialog(
       context: context,
-      // Usamos um Builder para criar um novo contexto para o AlertDialog
+      
       builder: (dialogContext) => AlertDialog( 
         title: const Icon(Icons.check_circle, color: Colors.green, size: 60),
         content: const Text(
@@ -30,7 +30,7 @@ class ReservationModal extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            // ✅ Usa o contexto local (dialogContext) para fechar APENAS o AlertDialog
+            
             onPressed: () => Navigator.pop(dialogContext), 
             child: const Text('OK')
           )
@@ -43,25 +43,25 @@ class ReservationModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    // ⚠️ INJEÇÃO LOCAL DO CONTROLLER E SERVICE 
-    // Isso garante que a instância do timer seja criada e destruída apenas com o modal.
+    
+    
     return ChangeNotifierProvider(
       create: (ctx) => ReservationController(
-        // Passa as dependências (Service e Controller global)
-        // ⚠️ Nota: Assumi o caminho correto dos Services.
+        
+        
         ReservationService(), 
         ctx.read<TicketController>(),
-      )..initialize(), // Inicializa o timer e carrega o perfil
+      )..initialize(), 
       
       child: Consumer<ReservationController>(
         builder: (ctx, controller, child) {
-          // 1. Listener de Timeout: Se o timer zerar, fecha o modal
+          
           if (controller.isTimeout.value && Navigator.canPop(ctx)) {
-             // Garante que o pop ocorra após o frame ser construído
+             
              WidgetsBinding.instance.addPostFrameCallback((_) {
-               // Fecha o modal se o tempo esgotar
+               
                Navigator.pop(ctx); 
-               // Feedback de timeout (opcional, aparece na tela principal)
+               
                ScaffoldMessenger.of(context).showSnackBar(
                  const SnackBar(content: Text('Tempo de reserva esgotado.'), backgroundColor: Colors.red),
                );
@@ -70,7 +70,7 @@ class ReservationModal extends StatelessWidget {
 
           return Container(
             padding: const EdgeInsets.all(24.0),
-            // Adiciona decoração para o BottomSheet
+            
             decoration: BoxDecoration(
               color: theme.scaffoldBackgroundColor,
               borderRadius: const BorderRadius.vertical(
@@ -84,13 +84,13 @@ class ReservationModal extends StatelessWidget {
                 ),
               ],
             ),
-            // O Modal deve ter uma altura limitada, mas expansível
+            
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header com Timer
+                  
                   _buildTimerHeader(theme, controller),
                   const SizedBox(height: 24),
 
@@ -98,7 +98,7 @@ class ReservationModal extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  // Conteúdo Principal (Horários e Botão)
+                  
                   if (controller.isLoadingProfile) 
                     const Center(child: Padding(
                       padding: EdgeInsets.all(40.0),
@@ -114,7 +114,7 @@ class ReservationModal extends StatelessWidget {
                         const Divider(),
                         const SizedBox(height: 16),
 
-                        // ✅ Passamos o contexto externo (ctx) e o movie
+                        
                         _buildSummaryAndButton(theme, controller, ctx, movie), 
                       ],
                     ),
@@ -127,10 +127,10 @@ class ReservationModal extends StatelessWidget {
     );
   }
 
-  // --- WIDGETS AUXILIARES E LÓGICA DE RENDERING ---
+  
 
   Widget _buildTimerHeader(ThemeData theme, ReservationController controller) {
-    // ✅ ValueListenableBuilder<int> remainingSeconds
+    
     return ValueListenableBuilder<int>(
       valueListenable: controller.remainingSeconds,
       builder: (context, remainingSeconds, child) {
@@ -204,7 +204,7 @@ class ReservationModal extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              // Badge do Plano
+              
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -257,14 +257,14 @@ class ReservationModal extends StatelessWidget {
     );
   }
   
-  // ✅ Recebe o context externo e o MovieModel
+  
   Widget _buildSummaryAndButton(ThemeData theme, ReservationController controller, BuildContext context, MovieModel movie) {
     final bool hasActivePlan = controller.hasActivePlan;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Total
+        
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -280,7 +280,7 @@ class ReservationModal extends StatelessWidget {
           ],
         ),
         
-        // Benefício
+        
         if (hasActivePlan)
           const Padding(
             padding: EdgeInsets.only(top: 4),
@@ -292,29 +292,29 @@ class ReservationModal extends StatelessWidget {
 
         const SizedBox(height: 24),
 
-        // Botão de Ação
+        
         CustomButton(
           text: hasActivePlan ? 'CONFIRMAR RESERVA (R\$ 0,00)' : 'IR PARA PAGAMENTO (R\$ 25,00)',
-          // ✅ Usa o getter público controller.ticketController.isLoading
+          
           isLoading: controller.ticketController.isLoading, 
           onPressed: controller.selectedTime == null 
             ? null 
             : () async {
-                // 1. Tenta fazer a reserva
+                
                 final success = await controller.handleReservation(movie.titulo);
                 
-                // 2. Se a reserva for bem-sucedida
+                
                 if (success) {
-                  // FECHA O MODAL PRINCIPAL (BottomSheet)
-                  // ⚠️ CORREÇÃO: Usar o contexto correto (contexto do builder Consumer)
+                  
+                  
                   if (Navigator.canPop(context)) Navigator.pop(context); 
                   
-                  // Exibe o Diálogo de Sucesso (usa o contexto que está abaixo do modal)
+                  
                   _showSuccessDialog(context); 
                 } else if (context.mounted) {
-                  // Se falhou e há mensagem de erro (do TicketController)
+                  
                   final errorMessage = controller.ticketController.errorMessage;
-                  // Garante que o modal principal feche em caso de erro, ou apenas exibe o SnackBar
+                  
                   ScaffoldMessenger.of(context).showSnackBar(
                      SnackBar(content: Text('Falha na Reserva: $errorMessage'), backgroundColor: Colors.red),
                   );

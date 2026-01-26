@@ -1,4 +1,4 @@
-// lib/widgets/themed_input_field.dart
+
 
 import 'package:flutter/material.dart';
 
@@ -24,7 +24,7 @@ class ThemedInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    // Adaptação das cores do seu CSS/Tailwind:
+    
     final fillColor = isDarkMode
         ? const Color(0xFF333333)
         : const Color(0xFFE5E7EB);
@@ -43,7 +43,7 @@ class ThemedInputField extends StatelessWidget {
       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: hintColor),
+      labelStyle: TextStyle(color: hintColor),
         filled: true,
         fillColor: fillColor,
         prefixIcon: icon != null ? Icon(icon, color: hintColor) : null,

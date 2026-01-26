@@ -12,36 +12,22 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-// -------------------------------------------------------------------
-// IMPORTAÇÕES DE TEMAS
-// -------------------------------------------------------------------
 import 'core/theme/app_themes.dart';
 
-// -------------------------------------------------------------------
-
 void main() async {
-  // 1. Garante que a engine do Flutter esteja pronta antes de código nativo
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. Inicializa o Firebase com as opções da plataforma (Android/iOS)
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
     MultiProvider(
       providers: [
-        // --- Controladores de UI e Core ---
         ChangeNotifierProvider(create: (_) => ThemeController()),
-
-        // --- Controladores de Autenticação ---
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => RegistrationController()),
-
-        // --- Controladores de Dados (Features) ---
         ChangeNotifierProvider(create: (_) => TicketController()),
         ChangeNotifierProvider(create: (_) => MovieController()),
 
-        // 🚀 ADICIONADO: PlanController Global
-        // Isso permite que a CheckoutPage (e qualquer outra tela) acesse o controller
         ChangeNotifierProvider(create: (_) => PlanController()),
         ChangeNotifierProvider(create: (_) => PaymentController()),
       ],
@@ -55,30 +41,19 @@ class CinePasseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Escuta mudanças no Tema (Claro/Escuro) e na Autenticação
     final themeController = context.watch<ThemeController>();
     final authController = context.watch<AuthController>();
 
     return MaterialApp(
       title: 'Cine Passe',
-      debugShowCheckedModeBanner: false, // Remove a faixa "Debug"
-      // -----------------------------------------------------------------
-      // CONFIGURAÇÃO DE TEMAS
-      // -----------------------------------------------------------------
-      theme: kLightTheme, // Tema Claro definido em app_themes.dart
-      darkTheme: kDarkTheme, // Tema Escuro definido em app_themes.dart
-      themeMode: themeController.themeMode, // Controlado pelo usuário
-      // -----------------------------------------------------------------
-      // LOCALIZAÇÃO
-      // -----------------------------------------------------------------
+      debugShowCheckedModeBanner: false,
+
+      theme: kLightTheme,
+      darkTheme: kDarkTheme,
+      themeMode: themeController.themeMode,
+
       locale: const Locale('pt', 'BR'),
 
-      // -----------------------------------------------------------------
-      // ROTEAMENTO INICIAL
-      // -----------------------------------------------------------------
-      // Verifica se existe um usuário logado no Firebase Auth.
-      // Se sim (isLoggedIn == true), vai direto para o App Principal.
-      // Se não, mostra a tela de Login.
       home: authController.isLoggedIn
           ? const MainAppWrapper()
           : const LoginPage(),

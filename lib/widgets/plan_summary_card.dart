@@ -1,7 +1,7 @@
 import 'package:cine_passe_app/models/plan_model.dart';
 import 'package:flutter/material.dart';
 
-// ✅ CLASSE RENOMEADA DE OrderSummaryCard PARA PlanCheckoutSummary
+
 class PlanCheckoutSummary extends StatelessWidget {
   final PlanModel plan;
 

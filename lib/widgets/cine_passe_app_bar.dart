@@ -1,4 +1,4 @@
-import 'dart:ui'; // ✅ MOVIDO PARA O TOPO
+import 'dart:ui'; 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -24,7 +24,7 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   Widget _buildLeading(BuildContext context) {
-    // Botão Voltar aparece apenas em telas secundárias
+    
     if (telaAtual == 'movieDetail' || telaAtual == 'planos') {
       return IconButton(
         icon: const Icon(FontAwesomeIcons.arrowLeft, size: 20),
@@ -70,9 +70,9 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildActions() {
-    // A ordem aqui define a posição: Esquerda -> Direita
+    
     return [
-      // 1. Botão de Troca de Tema
+      
       IconButton(
         onPressed: onThemeTogglePress,
         tooltip: 'Alternar Tema',
@@ -82,20 +82,20 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
 
-      // 2. ✅ Botão de Sair (Exatamente ao lado do Tema)
-      // Ele aparecerá em TODAS as telas (Home, Ingressos, Planos)
+      
+      
       IconButton(
-        // Se onLogoutPress for null, o botão ficará desabilitado (cinza).
-        // Certifique-se de passá-lo no MainAppWrapper.
+        
+        
         onPressed: onLogoutPress,
         tooltip: 'Sair',
         icon: const Icon(
-          FontAwesomeIcons.rightFromBracket, // Ícone de Logout
+          FontAwesomeIcons.rightFromBracket, 
           size: 20,
         ),
       ),
 
-      // 3. Menu de Usuário
+      
       IconButton(
         onPressed: onUserMenuPress,
         icon: const Icon(FontAwesomeIcons.solidUser, size: 20),
@@ -112,7 +112,7 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 64,
       titleSpacing: 0,
 
-      // Fundo com Blur para garantir visibilidade em cima de imagens
+      
       flexibleSpace: ClipRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -136,7 +136,7 @@ class CinePasseAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: _buildTitle(context),
       ),
 
-      // As ações são renderizadas incondicionalmente aqui
+      
       actions: _buildActions(),
 
       elevation: 0,

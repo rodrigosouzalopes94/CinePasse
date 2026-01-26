@@ -24,7 +24,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   PaymentMethod _selectedMethod = PaymentMethod.creditCard;
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers para os campos do cartão
+  
   final _numberCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
   final _expiryCtrl = TextEditingController();
@@ -59,12 +59,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Resumo do Pedido (Nome da classe corrigido: PlanCheckoutSummary)
+              
               PlanCheckoutSummary(plan: widget.plan),
 
               const SizedBox(height: 32),
 
-              // 2. Título Método
+              
               Text(
                 'Forma de Pagamento',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -73,7 +73,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ),
               const SizedBox(height: 16),
 
-              // 3. Seleção de Método
+              
               Row(
                 children: [
                   Expanded(
@@ -100,7 +100,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ),
               const SizedBox(height: 32),
 
-              // 4. Área Dinâmica (Formulário ou Pix)
+              
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: _selectedMethod == PaymentMethod.creditCard
@@ -116,7 +116,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
               const SizedBox(height: 40),
 
-              // 5. Botão Finalizar
+              
               CustomButton(
                 text: _selectedMethod == PaymentMethod.creditCard
                     ? 'PAGAR R\$ ${widget.plan.preco.toStringAsFixed(2).replaceAll('.', ',')}'

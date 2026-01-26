@@ -2,7 +2,7 @@ import 'package:cine_passe_app/features/controllers/auth_controller.dart';
 import 'package:cine_passe_app/features/controllers/theme_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui'; // Necessário para o BackdropFilter
+import 'dart:ui'; 
 
 import 'package:cine_passe_app/widgets/custom_button.dart';
 import 'package:cine_passe_app/widgets/custom_text_field.dart';
@@ -26,22 +26,22 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Escuta o AuthController para saber de loading/erros
+    
     final authController = context.watch<AuthController>();
-    // Escuta o tema para modo escuro/claro
+    
     final isDarkMode = Provider.of<ThemeController>(context).isDarkMode;
 
-    // Configurações de Estilo
-    const String backgroundImageUrl = 'https://i.imgur.com/UftFEv9.png';
+    
+    const String backgroundImageUrl = 'https://i.imgur.com/UftFEv9.png'; 
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    // Cor do painel com transparência
+    
     final panelBg = isDarkMode
         ? const Color(0xFF1C1C1C).withOpacity(0.75)
         : Colors.white.withOpacity(0.75);
 
     return Scaffold(
-      // Estende o corpo atrás da AppBar para manter o fundo imersivo
+      
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -53,7 +53,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ),
       body: Stack(
         children: [
-          // 1. Imagem de Fundo
+          
           Positioned.fill(
             child: Image.network(
               backgroundImageUrl,
@@ -61,12 +61,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               errorBuilder: (_, __, ___) => Container(color: Colors.black),
             ),
           ),
-          // 2. Overlay Escuro
+          
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.6)),
           ),
 
-          // 3. Conteúdo Central
+          
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -95,7 +95,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Título
+                            
                             Text(
                               'Recuperar Senha',
                               style: Theme.of(context).textTheme.headlineSmall
@@ -106,7 +106,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             const SizedBox(height: 8),
 
-                            // Descrição
+                            
                             Text(
                               'Digite seu email para receber o link de redefinição.',
                               textAlign: TextAlign.center,
@@ -118,7 +118,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             const SizedBox(height: 24),
 
-                            // Mensagem de Erro (Feedback visual)
+                            
                             if (authController.errorMessage != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
@@ -132,12 +132,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 ),
                               ),
 
-                            // Campo de Email
+                            
                             CustomTextField(
                               label: 'Email',
                               icon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
-                              // Atualiza o controller local ao digitar
+                              
                               onChanged: (val) => _emailController.text = val,
                               validator: (val) {
                                 if (val == null || val.isEmpty) {
@@ -151,18 +151,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             const SizedBox(height: 24),
 
-                            // Botão de Enviar
+                            
                             CustomButton(
                               text: 'ENVIAR EMAIL',
                               isLoading: authController.isLoading,
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  // Chama o método do AuthController para resetar a senha
+                                  
                                   final success = await context
                                       .read<AuthController>()
                                       .resetPassword(_emailController.text);
 
-                                  // Verifica se o widget ainda está na árvore antes de usar o contexto
+                                  
                                   if (success && context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -172,7 +172,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                         backgroundColor: Colors.green,
                                       ),
                                     );
-                                    // Retorna para a tela de login
+                                    
                                     Navigator.of(context).pop();
                                   }
                                 }

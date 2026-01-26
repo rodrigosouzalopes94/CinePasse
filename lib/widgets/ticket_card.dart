@@ -10,15 +10,15 @@ class TicketCard extends StatelessWidget {
 
   const TicketCard({super.key, required this.ticket});
 
-  // Mapeia o status para a cor da borda (replicando o CSS .ticket-visual)
+  
   Color _getBorderColor() {
     switch (ticket.status) {
       case TicketStatus.approved:
-        return kGreenCheckin; // .checked-in
+        return kGreenCheckin; 
       case TicketStatus.pending:
-        return kOrangePending; // .pending-checkin
+        return kOrangePending; 
       case TicketStatus.rejected:
-        return kRedRejected; // .rejected-checkin
+        return kRedRejected; 
     }
   }
 
@@ -31,13 +31,13 @@ class TicketCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       decoration: BoxDecoration(
-        color: theme.cardColor, // .themed-bg-light
-        borderRadius: BorderRadius.circular(12.0), // .rounded-xl
+        color: theme.cardColor, 
+        borderRadius: BorderRadius.circular(12.0), 
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(
               alpha: isDarkMode ? 0.3 : 0.1,
-            ), // .shadow-lg
+            ), 
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -49,25 +49,25 @@ class TicketCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Borda Esquerda Pontilhada (.ticket-visual border-left dashed)
+              
               Container(
                 width: 8.0,
                 color: borderColor.withValues(
                   alpha: 0.1,
-                ), // Fundo leve da borda
+                ), 
                 child: CustomPaint(
                   painter: _DashedLinePainter(color: borderColor),
                 ),
               ),
 
-              // 2. Conteúdo do Voucher
+              
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Cabeçalho: Status Badge e Tipo
+                      
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -95,7 +95,7 @@ class TicketCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
 
-                      // Título do Filme
+                      
                       Text(
                         ticket.movieTitle,
                         style: theme.textTheme.titleLarge?.copyWith(
@@ -105,7 +105,7 @@ class TicketCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
 
-                      // Detalhes da Sessão (Ícone + Texto)
+                      
                       Row(
                         children: [
                           Icon(
@@ -140,7 +140,7 @@ class TicketCard extends StatelessWidget {
                       const Divider(height: 1),
                       const SizedBox(height: 12),
 
-                      // Código do Voucher (Footer)
+                      
                       Row(
                         children: [
                           Text(
@@ -169,7 +169,7 @@ class TicketCard extends StatelessWidget {
                 ),
               ),
 
-              // 3. QR Code (Área Direita)
+              
               Container(
                 width: 100,
                 decoration: BoxDecoration(
@@ -182,7 +182,7 @@ class TicketCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Simulação do QR Code (em app real usaria o pacote qr_flutter)
+                    
                     Container(
                       height: 70,
                       width: 70,
@@ -216,7 +216,7 @@ class TicketCard extends StatelessWidget {
   }
 }
 
-// Pintor para replicar o "border-left: 8px dashed"
+
 class _DashedLinePainter extends CustomPainter {
   final Color color;
 
@@ -227,20 +227,20 @@ class _DashedLinePainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..strokeWidth =
-          2.0 // Espessura do traço
+          2.0 
       ..style = PaintingStyle
-          .stroke; // Alterado para stroke para fazer linhas diagonais ou retas
+          .stroke; 
 
-    // Vamos fazer um padrão pontilhado vertical no centro do container de 8px
+    
     const double dashHeight = 6;
     const double dashSpace = 4;
     double startY = 2;
 
-    // Ajusta o paint para preencher
+    
     paint.style = PaintingStyle.fill;
 
     while (startY < size.height) {
-      // Desenha pequenos retângulos verticais para simular o 'dashed' grosso
+      
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(
@@ -248,7 +248,7 @@ class _DashedLinePainter extends CustomPainter {
             startY,
             4,
             dashHeight,
-          ), // Centralizado no container de 8px
+          ), 
           const Radius.circular(2),
         ),
         paint,

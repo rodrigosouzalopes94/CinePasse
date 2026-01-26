@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui'; // Necessário para o BackdropFilter
+import 'dart:ui'; 
 
-// Widgets Customizados
+
 import '../../../widgets/custom_button.dart';
-import '../../../widgets/custom_text_field.dart'; // ✅ Usando o componente correto
+import '../../../widgets/custom_text_field.dart'; 
 
-// Controllers
+
 import '../controllers/registration_controller.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -14,25 +14,25 @@ class RegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Acessa o Controller
+    
     final controller = context.watch<RegistrationController>();
-    // Apenas para leitura (chamar métodos sem reconstruir)
+    
     final reader = context.read<RegistrationController>();
 
     final formKey = GlobalKey<FormState>();
 
-    // Configurações visuais (Idênticas ao Login para consistência)
+    
     const String backgroundImageUrl = 'https://i.imgur.com/UftFEv9.png';
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    // Fundo do painel com transparência
+    
     final panelBg = isDarkMode
         ? const Color(0xFF1C1C1C).withOpacity(0.75)
         : Colors.white.withOpacity(0.75);
 
     return Scaffold(
-      // AppBar transparente para o botão de voltar aparecer em cima da imagem
+      
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -44,7 +44,7 @@ class RegisterPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // 1. Imagem de Fundo
+          
           Positioned.fill(
             child: Image.network(
               backgroundImageUrl,
@@ -53,12 +53,12 @@ class RegisterPage extends StatelessWidget {
             ),
           ),
 
-          // 2. Overlay Escuro
+          
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.5)),
           ),
 
-          // 3. Conteúdo Centralizado
+          
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -80,7 +80,7 @@ class RegisterPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Título
+                            
                             Text(
                               'Criar Conta',
                               textAlign: TextAlign.center,
@@ -102,7 +102,7 @@ class RegisterPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 32.0),
 
-                            // Mensagem de Erro Geral
+                            
                             if (controller.errorMessage != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
@@ -116,7 +116,7 @@ class RegisterPage extends StatelessWidget {
                                 ),
                               ),
 
-                            // 1. Nome Completo
+                            
                             CustomTextField(
                               label: 'Nome Completo',
                               icon: Icons.person_outline,
@@ -125,7 +125,7 @@ class RegisterPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 16.0),
 
-                            // 2. Email
+                            
                             CustomTextField(
                               label: 'Email',
                               icon: Icons.email_outlined,
@@ -135,7 +135,7 @@ class RegisterPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 16.0),
 
-                            // 3. Senha
+                            
                             CustomTextField(
                               label: 'Senha',
                               icon: Icons.lock_outline,
@@ -145,7 +145,7 @@ class RegisterPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 16.0),
 
-                            // 4. CPF
+                            
                             CustomTextField(
                               label: 'CPF (apenas números)',
                               icon: Icons.badge_outlined,
@@ -155,7 +155,7 @@ class RegisterPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 16.0),
 
-                            // 5. Idade
+                            
                             CustomTextField(
                               label: 'Idade',
                               icon: Icons.calendar_today_outlined,
@@ -165,7 +165,7 @@ class RegisterPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 32.0),
 
-                            // Botão Cadastrar
+                            
                             CustomButton(
                               text: 'CADASTRAR',
                               isLoading: controller.isLoading,
@@ -176,7 +176,7 @@ class RegisterPage extends StatelessWidget {
                                         final success = await reader
                                             .registerUser();
                                         if (success && context.mounted) {
-                                          // Sucesso: Volta para o login e mostra mensagem
+                                          
                                           Navigator.of(context).pop();
                                           ScaffoldMessenger.of(
                                             context,
@@ -195,7 +195,7 @@ class RegisterPage extends StatelessWidget {
 
                             const SizedBox(height: 20.0),
 
-                            // Link Voltar para Login
+                            
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

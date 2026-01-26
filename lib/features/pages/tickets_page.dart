@@ -10,27 +10,27 @@ class TicketsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Acessa o controller via Provider (certifique-se de adicioná-lo no main.dart)
+    
     final ticketController = Provider.of<TicketController>(
       context,
       listen: false,
     );
     final theme = Theme.of(context);
 
-    // O Scaffold é opcional aqui se a MainAppWrapper já tiver estrutura,
-    // mas ajuda a manter o padding e cor de fundo consistentes.
+    
+    
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: StreamBuilder<List<TicketModel>>(
-        // 2. Escuta o fluxo de dados do Firestore em tempo real
+        
         stream: ticketController.approvedTicketsStream,
         builder: (context, snapshot) {
-          // --- ESTADO: CARREGANDO ---
+          
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // --- ESTADO: ERRO ---
+          
           if (snapshot.hasError) {
             return Center(
               child: Padding(
@@ -59,7 +59,7 @@ class TicketsPage extends StatelessWidget {
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: () {
-                        // Força a reconstrução do widget para tentar reconectar
+                        
                         (context as Element).markNeedsBuild();
                       },
                       icon: const Icon(Icons.refresh),
@@ -73,7 +73,7 @@ class TicketsPage extends StatelessWidget {
 
           final tickets = snapshot.data ?? [];
 
-          // --- ESTADO: LISTA VAZIA (Empty State fiel ao conceito) ---
+          
           if (tickets.isEmpty) {
             return Center(
               child: SingleChildScrollView(
@@ -102,15 +102,15 @@ class TicketsPage extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    // Nota: O botão de "Explorar" geralmente ficaria aqui,
-                    // mas a navegação para a Home é feita pela BottomBar.
+                    
+                    
                   ],
                 ),
               ),
             );
           }
 
-          // --- ESTADO: LISTA DE DADOS ---
+          
           return ListView.builder(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,

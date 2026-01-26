@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart'; // Usado para ChangeNotifier
+import 'package:flutter/foundation.dart'; 
 
 class ReservationService {
-  static const int reservationDuration = 15 * 60; // 15 minutos em segundos
+  static const int reservationDuration = 15 * 60; 
 
   Timer? _timer;
   ValueNotifier<int> remainingSeconds = ValueNotifier(reservationDuration);
   ValueNotifier<bool> isTimeout = ValueNotifier(false);
 
   void startTimer() {
-    // Garante que o timer antigo seja cancelado
+    
     _timer?.cancel();
     remainingSeconds.value = reservationDuration;
     isTimeout.value = false;

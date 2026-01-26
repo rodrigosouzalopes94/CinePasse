@@ -5,7 +5,7 @@ class PlanModel {
   final double preco;
   final List<String> beneficios;
   final bool isPopular;
-  final int maxMembros; // Novo: para controlar a regra do plano família
+  final int maxMembros; 
 
   const PlanModel({
     required this.id,
@@ -17,9 +17,9 @@ class PlanModel {
     this.maxMembros = 1,
   });
 
-  // -------------------------------------------------------------------
-  // DADOS FIXOS (HARDCODED)
-  // -------------------------------------------------------------------
+  
+  
+  
   static const List<PlanModel> list = [
     PlanModel(
       id: 'premium',

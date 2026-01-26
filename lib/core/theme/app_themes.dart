@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cine_passe_app/core/constants/colors_constants.dart';
-import 'package:google_fonts/google_fonts.dart'; // PACOTE GOOGLE FONTS
+import 'package:google_fonts/google_fonts.dart'; 
 
-// -------------------------------------------------------------------
-// 💡 Tema Claro (Light Theme)
-// -------------------------------------------------------------------
+
 final ThemeData kLightTheme = ThemeData(
-  // 1. Configuração Principal
+ 
   brightness: Brightness.light,
   useMaterial3: true,
   primaryColor: kPrimaryColor,
@@ -15,7 +13,7 @@ final ThemeData kLightTheme = ThemeData(
     seedColor: kPrimaryColor,
     brightness: Brightness.light,
 
-    // Cores M3
+    
     primary: kPrimaryColor,
     onPrimary: kTextLight,
     secondary: kGreenCheckin,
@@ -25,21 +23,21 @@ final ThemeData kLightTheme = ThemeData(
     onError: kBgLightLight,
   ),
 
-  // 2. Cores de Fundo da Tela
+  
   scaffoldBackgroundColor: kBgLight,
 
-  // 3. Estilo de Texto Padrão (APLICAÇÃO DO POPPINS)
+  
   textTheme:
       GoogleFonts.poppinsTextTheme(
-        ThemeData.light().textTheme, // Baseia-se no TextTheme padrão light
+        ThemeData.light().textTheme, 
       ).copyWith(
-        // Sobrescreve as cores do Poppins para usar a cor de texto do seu tema (kTextLight)
+        
         bodyLarge: TextStyle(color: kTextLight),
         bodyMedium: TextStyle(color: kTextLight),
-        // Repita para outros estilos importantes se necessário (ex: headline, title)
+        
       ),
 
-  // 4. Estilos de Componentes
+  
   appBarTheme: AppBarTheme(
     backgroundColor: kBgLightLight,
     foregroundColor: kTextLight,
@@ -51,11 +49,11 @@ final ThemeData kLightTheme = ThemeData(
   ),
 );
 
-// -------------------------------------------------------------------
-// 🌑 Tema Escuro (Dark Theme)
-// -------------------------------------------------------------------
+
+
+
 final ThemeData kDarkTheme = ThemeData(
-  // 1. Configuração Principal
+  
   brightness: Brightness.dark,
   useMaterial3: true,
   primaryColor: kPrimaryColor,
@@ -64,7 +62,7 @@ final ThemeData kDarkTheme = ThemeData(
     seedColor: kPrimaryColor,
     brightness: Brightness.dark,
 
-    // Cores M3
+    
     primary: kPrimaryColor,
     onPrimary: kTextDark,
     secondary: kGreenCheckin,
@@ -74,21 +72,21 @@ final ThemeData kDarkTheme = ThemeData(
     onError: kTextDark,
   ),
 
-  // 2. Cores de Fundo da Tela
+  
   scaffoldBackgroundColor: kBgDark,
 
-  // 3. Estilo de Texto Padrão (APLICAÇÃO DO POPPINS)
+  
   textTheme:
       GoogleFonts.poppinsTextTheme(
-        ThemeData.dark().textTheme, // Baseia-se no TextTheme padrão dark
+        ThemeData.dark().textTheme, 
       ).copyWith(
-        // Sobrescreve as cores do Poppins para usar a cor de texto do seu tema (kTextDark)
+        
         bodyLarge: TextStyle(color: kTextDark),
         bodyMedium: TextStyle(color: kTextDark),
-        // Repita para outros estilos importantes
+        
       ),
 
-  // 4. Estilos de Componentes
+  
   appBarTheme: AppBarTheme(
     backgroundColor: kBgDarkLight,
     foregroundColor: kTextDark,

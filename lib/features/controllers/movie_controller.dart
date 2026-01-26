@@ -7,16 +7,16 @@ class MovieController extends ChangeNotifier {
   final MovieService _service = MovieService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool _isRating = false; // Estado de carregamento ao enviar avaliação
+  bool _isRating = false; 
   String? _errorMessage;
 
   bool get isRating => _isRating;
   String? get errorMessage => _errorMessage;
 
-  // Stream direta para a UI consumir (HomePage)
+  
   Stream<List<MovieModel>> get moviesStream => _service.getMoviesStream();
 
-  // Ação de Avaliar
+  
   Future<bool> submitRating(
     String movieId,
     double rating, {
@@ -38,12 +38,12 @@ class MovieController extends ChangeNotifier {
       await _service.rateMovie(movieId, user.uid, rating, comment);
       _isRating = false;
       notifyListeners();
-      return true; // Sucesso
+      return true; 
     } catch (e) {
       _isRating = false;
       _errorMessage = "Erro ao enviar avaliação: $e";
       notifyListeners();
-      return false; // Falha
+      return false; 
     }
   }
 }

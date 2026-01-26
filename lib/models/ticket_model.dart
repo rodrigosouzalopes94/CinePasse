@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Enum para representar o status de aprovação do voucher
+
 enum TicketStatus { pending, approved, rejected }
 
 class TicketModel {
@@ -29,9 +29,9 @@ class TicketModel {
     this.qrCodeUrl,
   });
 
-  // ============================================
-  // 1. ENVIO PARA O FIRESTORE
-  // ============================================
+  
+  
+  
   Map<String, dynamic> toMap() {
     return {
       'usuarioId': usuarioId,
@@ -50,9 +50,9 @@ class TicketModel {
     };
   }
 
-  // ============================================
-  // 2. LEITURA DO FIRESTORE
-  // ============================================
+  
+  
+  
   factory TicketModel.fromMap(Map<String, dynamic> data, String documentId) {
     return TicketModel(
       ticketId: documentId,
@@ -69,9 +69,9 @@ class TicketModel {
     );
   }
 
-  // ============================================
-  // 3. MAPEAMENTO ROBUSTO DE STATUS 🔥
-  // ============================================
+  
+  
+  
   static TicketStatus _mapStatus(String? status) {
     if (status == null) return TicketStatus.pending;
 

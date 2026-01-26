@@ -6,14 +6,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:cine_passe_app/core/utils/get_rating_color.dart';
 import 'package:cine_passe_app/widgets/custom_button.dart';
-// ✅ Import do Modal
+
 
 class MovieDetailPage extends StatelessWidget {
   final MovieModel movie;
 
   const MovieDetailPage({super.key, required this.movie});
 
-  // Método para abrir o modal de reserva
+  
   void _showReservationModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -33,7 +33,7 @@ class MovieDetailPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // Botão de volta estilizado
+        
         leading: Container(
           margin: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
           decoration: BoxDecoration(
@@ -51,18 +51,18 @@ class MovieDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. HERO SECTION (Backdrop + Poster)
+            
             _buildHeader(context),
 
             const SizedBox(height: 24),
 
-            // 2. CONTEÚDO PRINCIPAL
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Título
+                  
                   Text(
                     movie.titulo,
                     style: theme.textTheme.headlineMedium?.copyWith(
@@ -72,14 +72,14 @@ class MovieDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Metadados (Gênero • Duração)
+                  
                   Text(
                     '${movie.genero} • ${movie.duracao}',
                     style: TextStyle(fontSize: 16, color: Colors.grey.shade500),
                   ),
                   const SizedBox(height: 16),
 
-                  // Badges (Classificação e Estrelas)
+                  
                   Row(
                     children: [
                       Container(
@@ -120,7 +120,7 @@ class MovieDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  // Sinopse
+                  
                   Text(
                     movie.sinopse,
                     style: TextStyle(
@@ -134,7 +134,7 @@ class MovieDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 32),
 
-                  // ✅ Botão de Ação (Abre o Modal de Reserva/Timer)
+                  
                   CustomButton(
                     text: 'Reservar Ingresso',
                     onPressed: () => _showReservationModal(context),
@@ -144,7 +144,7 @@ class MovieDetailPage extends StatelessWidget {
                   const Divider(),
                   const SizedBox(height: 20),
 
-                  // Seção Avaliações (Placeholder)
+                  
                   Center(
                     child: Column(
                       children: [
@@ -179,27 +179,27 @@ class MovieDetailPage extends StatelessWidget {
     );
   }
 
-  // Widget auxiliar para montar o cabeçalho complexo (Imagem de fundo + Poster)
+  
   Widget _buildHeader(BuildContext context) {
-    // Usa backdropUrl se disponível, senão usa a imagemUrl (poster) com zoom/blur
+    
     final bgImage = movie.backdropUrl ?? movie.imagemUrl;
 
     return SizedBox(
-      height: 400, // Altura da área de destaque
+      height: 400, 
       child: Stack(
         children: [
-          // Fundo (Backdrop)
+          
           Positioned.fill(
             child: Image.network(
               bgImage,
               fit: BoxFit.cover,
-              color: Colors.black.withOpacity(0.6), // Escurece a imagem
+              color: Colors.black.withOpacity(0.6), 
               colorBlendMode: BlendMode.darken,
               errorBuilder: (_, __, ___) => Container(color: Colors.grey[900]),
             ),
           ),
 
-          // Gradiente inferior para suavizar a transição para o corpo
+          
           Positioned(
             bottom: 0,
             left: 0,
@@ -219,7 +219,7 @@ class MovieDetailPage extends StatelessWidget {
             ),
           ),
 
-          // Poster Flutuante Centralizado
+          
           Positioned(
             bottom: 0,
             left: 20,

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cine_passe_app/widgets/custom_button.dart';
 
-// -------------------------------------------------------------------
-// CARD DE PLANO
-// -------------------------------------------------------------------
+
+
+
 class PlanCard extends StatelessWidget {
   final PlanModel plan;
   final VoidCallback onSubscribe;
@@ -33,7 +33,7 @@ class PlanCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.cardColor,
             borderRadius: BorderRadius.circular(20.0),
-            // Borda destaque se for popular
+            
             border: plan.isPopular
                 ? Border.all(color: primaryColor, width: 2)
                 : null,
@@ -50,7 +50,7 @@ class PlanCard extends StatelessWidget {
             children: [
               if (plan.isPopular) const SizedBox(height: 12),
 
-              // Nome
+              
               Text(
                 plan.nome,
                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -60,7 +60,7 @@ class PlanCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Descrição
+              
               Text(
                 plan.descricao,
                 style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
@@ -68,7 +68,7 @@ class PlanCard extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Preço
+              
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -100,7 +100,7 @@ class PlanCard extends StatelessWidget {
               const Divider(),
               const SizedBox(height: 24),
 
-              // Benefícios
+              
               ...plan.beneficios.map(
                 (beneficio) => Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
@@ -125,7 +125,7 @@ class PlanCard extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Botão
+              
               CustomButton(
                 text: 'ASSINAR AGORA',
                 isLoading: isLoading,
@@ -135,15 +135,15 @@ class PlanCard extends StatelessWidget {
           ),
         ),
 
-        // Badge "MAIS POPULAR"
+        
         if (plan.isPopular)
           Positioned(
             top: -12,
-            right: 20, // No HTML era right: 4, aqui ajustamos para ficar bonito
+            right: 20, 
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.amber, // bg-yellow-400
+                color: Colors.amber, 
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -156,7 +156,7 @@ class PlanCard extends StatelessWidget {
               child: const Text(
                 'MAIS POPULAR',
                 style: TextStyle(
-                  color: Colors.brown, // text-yellow-900
+                  color: Colors.brown, 
                   fontWeight: FontWeight.bold,
                   fontSize: 10,
                   letterSpacing: 1.0,
@@ -169,9 +169,9 @@ class PlanCard extends StatelessWidget {
   }
 }
 
-// -------------------------------------------------------------------
-// CARD DE FAQ
-// -------------------------------------------------------------------
+
+
+
 class FaqCard extends StatelessWidget {
   final String question;
   final String answer;

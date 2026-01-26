@@ -2,8 +2,8 @@ import 'package:cine_passe_app/models/plan_model.dart';
 import 'package:cine_passe_app/widgets/plans_widgets.dart';
 import 'package:flutter/material.dart';
 
-// Pages
-import 'checkout_page.dart'; // Import relativo (pois estão na mesma pasta)
+
+import 'checkout_page.dart'; 
 
 class PlansPage extends StatelessWidget {
   const PlansPage({super.key});
@@ -18,7 +18,7 @@ class PlansPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
         child: Column(
           children: [
-            // 1. Cabeçalho
+            
             Padding(
               padding: const EdgeInsets.only(bottom: 40.0),
               child: Column(
@@ -45,15 +45,15 @@ class PlansPage extends StatelessWidget {
               ),
             ),
 
-            // 2. Lista de Planos
-            // Mapeia a lista estática do Model para os Cards
+            
+            
             ...PlanModel.list.map(
               (plan) => PlanCard(
                 plan: plan,
                 isLoading:
-                    false, // O loading acontece na próxima tela (Checkout)
+                    false, 
                 onSubscribe: () {
-                  // 🚀 NAVEGAÇÃO PARA O CHECKOUT
+                  
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => CheckoutPage(plan: plan),
@@ -67,7 +67,7 @@ class PlansPage extends StatelessWidget {
             Divider(color: theme.dividerColor.withOpacity(0.5)),
             const SizedBox(height: 32),
 
-            // 3. FAQ (Perguntas Frequentes)
+            
             Column(
               children: [
                 Text(

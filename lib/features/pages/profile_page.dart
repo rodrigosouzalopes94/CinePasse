@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
-// Importando Widgets Customizados
-import 'package:cine_passe_app/widgets/custom_button.dart'; 
-import 'package:cine_passe_app/widgets/custom_text_field.dart'; // ✅ NOVO: CustomTextField
 
-// Controllers e Services
+import 'package:cine_passe_app/widgets/custom_button.dart'; 
+import 'package:cine_passe_app/widgets/custom_text_field.dart'; 
+
+
 
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -24,23 +24,23 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   
-  // Controllers para os campos editáveis
+  
   late TextEditingController _nameController = TextEditingController();
   late TextEditingController _ageController = TextEditingController();
   
-  // Campo editável via Dropdown
+  
   String? _selectedPlan; 
   
-  // Campos somente leitura
+  
   late TextEditingController _emailController = TextEditingController();
   late TextEditingController _cpfController = TextEditingController(); 
 
   bool _isLoading = false;
   String? _errorMessage;
   UserModel? _userProfile;
-  bool _isInitializing = true; // Novo estado para controlar o carregamento inicial
+  bool _isInitializing = true; 
 
-  // Lista de strings válidas para o plano (deve corresponder aos nomes no Firestore)
+  
   final List<String> _planOptions = const [
     'Nenhum',
     'Passe Premium',
@@ -50,17 +50,17 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    // Inicia o carregamento no primeiro frame
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProfileData(context.read<AuthController>());
     });
   }
 
-  // Inicializa os controladores puxando os dados do AuthController
+  
   Future<void> _loadProfileData(AuthController authController) async {
     setState(() => _isLoading = true);
     
-    // ⚠️ CRÍTICO: Garantir que o perfil esteja carregado antes de usar
+    
     await authController.fetchUserProfile();
     
     if (mounted && authController.userProfile != null) {
@@ -79,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _ageController = TextEditingController(text: profile.idade.toString());
     _emailController = TextEditingController(text: profile.email);
     _cpfController = TextEditingController(text: profile.cpf);
-    // ✅ Inicializa o valor do dropdown com o plano atual do usuário
+    
     _selectedPlan = profile.planoAtual; 
   }
 
@@ -108,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final newAge = int.tryParse(_ageController.text) ?? _userProfile!.idade;
     
     try {
-      // ✅ Chama o método atualizado no Controller
+      
       await authController.updateProfileDetails(
         newName: newName, 
         newAge: newAge,
@@ -118,13 +118,13 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _userProfile = authController.userProfile; // Puxa o modelo atualizado
+          _userProfile = authController.userProfile; 
         });
         
-        // Retorna para a tela anterior
+        
         Navigator.of(context).pop(); 
         
-        // Exibir um SnackBar de sucesso
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Perfil atualizado com sucesso!'), backgroundColor: Colors.green),
         );
@@ -158,7 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     
     if (_userProfile == null) {
-      // Retorna estado de erro se o perfil não puder ser carregado
+      
       return Scaffold(
         appBar: AppBar(title: const Text('Perfil')),
         body: Center(
@@ -167,9 +167,9 @@ class _ProfilePageState extends State<ProfilePage> {
       );
     }
     
-    // Regra de Negócio: Verifica status do Plano
+    
     final bool hasPlan = _userProfile!.planoAtual != 'Nenhum' && _userProfile!.planoAtual != null;
-    // Mock da validade para exibição
+    
     final String validade = DateFormat('dd/MM/yyyy').format(DateTime.now().add(const Duration(days: 30)));
 
     return Scaffold(
@@ -185,7 +185,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Avatar Simples
+              
               CircleAvatar(
                 radius: 40,
                 backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
@@ -196,15 +196,15 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 32),
               
-              // -----------------------------------------------------------
-              // CAMPOS EDITÁVEIS (Nome e Idade) USANDO CUSTOM TEXT FIELD
-              // -----------------------------------------------------------
               
-              // Campo Nome
+              
+              
+              
+              
               CustomTextField(
                 label: 'Nome',
                 icon: Icons.person,
-                // ✅ Usamos o TextEditingController para pré-popular e gerenciar o estado
+                
                 controller: _nameController, 
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -215,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
               
-              // Campo Idade
+              
               CustomTextField(
                 label: 'Idade',
                 icon: Icons.calendar_today,
@@ -230,9 +230,9 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 32),
               
-              // -----------------------------------------------------------
-              // CAMPO PLANO (EDITÁVEL via Dropdown)
-              // -----------------------------------------------------------
+              
+              
+              
               DropdownButtonFormField<String>(
                 value: _selectedPlan,
                 decoration: const InputDecoration(
@@ -255,9 +255,9 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 32),
 
-              // -----------------------------------------------------------
-              // INFORMAÇÕES SOMENTE LEITURA
-              // -----------------------------------------------------------
+              
+              
+              
               
               Text(
                 'Informações da Conta (Somente Leitura)',
@@ -265,18 +265,18 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
               
-              // Campo E-mail (Somente leitura - usa CustomTextField)
+              
               CustomTextField(
                 label: 'E-mail',
                 icon: Icons.email,
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 readOnly: true,
-                // Usamos fill color no CustomTextField para indicar que é readOnly
+                
               ),
               const SizedBox(height: 16),
               
-              // Campo CPF (Somente leitura - usa CustomTextField)
+              
               CustomTextField(
                 label: 'CPF',
                 icon: FontAwesomeIcons.idCard,
@@ -287,9 +287,9 @@ class _ProfilePageState extends State<ProfilePage> {
               
               const SizedBox(height: 32),
               
-              // -----------------------------------------------------------
-              // STATUS DO PLANO ATUAL (Visualização Simples)
-              // -----------------------------------------------------------
+              
+              
+              
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -328,7 +328,7 @@ class _ProfilePageState extends State<ProfilePage> {
               
               const SizedBox(height: 32),
 
-              // Mensagem de Erro
+              
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
@@ -339,7 +339,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 
-              // Botão Salvar
+              
               CustomButton(
                 text: 'SALVAR ALTERAÇÕES',
                 isLoading: _isLoading,

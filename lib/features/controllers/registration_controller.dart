@@ -4,15 +4,15 @@ import 'package:cine_passe_app/models/user_model.dart';
 import 'package:flutter/material.dart';
 
 class RegistrationController extends ChangeNotifier {
-  // -------------------------------------------------------------------
-  // Dependências (Services e API)
-  // -------------------------------------------------------------------
+  
+  
+  
   final AuthService _authService = AuthService();
   final UserFirestoreService _userFirestoreService = UserFirestoreService();
 
-  // -------------------------------------------------------------------
-  // Estado do Formulário
-  // -------------------------------------------------------------------
+  
+  
+  
   String _name = '';
   String _cpf = '';
   String _email = '';
@@ -22,23 +22,23 @@ class RegistrationController extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // -------------------------------------------------------------------
-  // Getters
-  // -------------------------------------------------------------------
+  
+  
+  
   String get name => _name;
   String get email => _email;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // -------------------------------------------------------------------
-  // Setters (Otimizados para evitar rebuild desnecessário)
-  // -------------------------------------------------------------------
-  // NOTA: Removemos notifyListeners() daqui para evitar que o teclado feche
-  // a cada letra digitada na UI (problema de perda de foco).
+  
+  
+  
+  
+  
 
   void setName(String value) {
     _name = value;
-    // Só limpamos o erro visualmente se ele existir, para evitar rebuild constante
+    
     if (_errorMessage != null) _clearError();
   }
 
@@ -58,9 +58,9 @@ class RegistrationController extends ChangeNotifier {
     _age = int.tryParse(value) ?? 0;
   }
 
-  // -------------------------------------------------------------------
-  // Validações
-  // -------------------------------------------------------------------
+  
+  
+  
   String? validateName(String? value) {
     if (value == null || value.isEmpty) return 'Nome é obrigatório.';
     return null;
@@ -92,44 +92,44 @@ class RegistrationController extends ChangeNotifier {
     return null;
   }
 
-  // -------------------------------------------------------------------
-  // Lógica de Registro (Conectada aos Services)
-  // -------------------------------------------------------------------
+  
+  
+  
   Future<bool> registerUser() async {
-    // 1. Validação prévia de campos vazios antes de chamar o Firebase
+    
     if (_name.isEmpty || _email.isEmpty || _password.isEmpty || _cpf.isEmpty) {
       _errorMessage = 'Por favor, preencha todos os campos.';
-      notifyListeners(); // Avisa a UI para mostrar o erro
+      notifyListeners(); 
       return false;
     }
 
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners(); // Avisa a UI para mostrar o loading spinner
+    notifyListeners(); 
 
     try {
-      // 2. Cria a conta no Firebase Auth
+      
       final userCredential = await _authService.register(_email, _password);
 
       if (userCredential != null) {
-        // 3. Prepara o modelo de dados
+        
         final newUser = UserModel(
-          uid: userCredential.uid, // Usa o UID gerado pelo Auth
+          uid: userCredential.uid, 
           nome: _name,
           cpf: _cpf,
           email: _email,
           idade: _age,
         );
 
-        // 4. Salva os dados complementares no Firestore
+        
         await _userFirestoreService.saveUser(newUser);
 
         _isLoading = false;
         notifyListeners();
-        return true; // Sucesso
+        return true; 
       }
     } catch (e) {
-      // Trata erros vindos do AuthService ou FirestoreService
+      
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       debugPrint('Erro no Registro: $_errorMessage');
     } finally {
@@ -137,7 +137,7 @@ class RegistrationController extends ChangeNotifier {
       notifyListeners();
     }
 
-    return false; // Falha
+    return false; 
   }
 
   void _clearError() {

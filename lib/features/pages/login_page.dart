@@ -1,7 +1,7 @@
-// ignore_for_file: deprecated_member_use
+
 
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Para o BackdropFilter
+import 'dart:ui'; 
 import 'package:provider/provider.dart';
 
 import '../../../widgets/custom_button.dart';
@@ -15,19 +15,19 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Acessa o controller (watch para reconstruir a tela em mudanças de estado)
+    
     final controller = context.watch<AuthController>();
-    // Acessa o controller apenas para leitura (chamar métodos)
+    
     final authReader = context.read<AuthController>();
 
     final formKey = GlobalKey<FormState>();
 
-    // Configurações visuais baseadas no tema e CSS original
+    
     const String backgroundImageUrl = 'https://i.imgur.com/UftFEv9.png';
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    // Define a cor do painel com transparência dependendo do tema
+    
     final panelBg = isDarkMode
         ? const Color(0xFF1C1C1C).withValues(alpha: 0.75)
         : Colors.white.withOpacity(0.75);
@@ -37,26 +37,26 @@ class LoginPage extends StatelessWidget {
         : const Color(0xFF6B7280);
 
     return Scaffold(
-      // Stack permite colocar a imagem de fundo atrás do conteúdo
+      
       body: Stack(
         children: [
-          // 1. Imagem de Fundo
+          
           Positioned.fill(
             child: Image.network(
               backgroundImageUrl,
               fit: BoxFit.cover,
-              // Fallback caso a imagem não carregue
+              
               errorBuilder: (context, error, stackTrace) =>
                   Container(color: Colors.black),
             ),
           ),
 
-          // 2. Overlay Escuro (para melhorar legibilidade)
+          
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.5)),
           ),
 
-          // 3. Conteúdo Principal Centralizado
+          
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -66,7 +66,7 @@ class LoginPage extends StatelessWidget {
                   _buildAppTitle(context),
                   const SizedBox(height: 40.0),
 
-                  // Painel de Login (Container com Blur)
+                  
                   Container(
                     width: double.infinity,
                     constraints: const BoxConstraints(maxWidth: 400),
@@ -76,7 +76,7 @@ class LoginPage extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20.0),
-                      // Efeito de desfoque no fundo do painel
+                      
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                         child: Padding(
@@ -85,7 +85,7 @@ class LoginPage extends StatelessWidget {
                             key: formKey,
                             child: Column(
                               children: [
-                                // Mensagem de Erro (se houver)
+                                
                                 if (controller.errorMessage != null)
                                   Padding(
                                     padding: const EdgeInsets.only(
@@ -103,7 +103,7 @@ class LoginPage extends StatelessWidget {
                                     ),
                                   ),
 
-                                // Campo Email
+                                
                                 CustomTextField(
                                   label: 'Email',
                                   icon: Icons.email_outlined,
@@ -113,7 +113,7 @@ class LoginPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 16.0),
 
-                                // Campo Senha
+                                
                                 CustomTextField(
                                   label: 'Senha',
                                   icon: Icons.lock_outline,
@@ -123,12 +123,12 @@ class LoginPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 20.0),
 
-                                // Linha: Lembrar-me e Esqueceu a senha
+                                
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Checkbox "Lembrar-me"
+                                    
                                     Row(
                                       children: [
                                         Checkbox(
@@ -147,7 +147,7 @@ class LoginPage extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                    // Link "Esqueceu a senha?"
+                                    
                                     TextButton(
                                       onPressed: () {
                                         Navigator.of(context).push(
@@ -169,7 +169,7 @@ class LoginPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 20.0),
 
-                                // Botão de Login
+                                
                                 CustomButton(
                                   text: 'Entrar',
                                   isLoading: controller.isLoading,
@@ -185,7 +185,7 @@ class LoginPage extends StatelessWidget {
 
                                 const SizedBox(height: 16.0),
 
-                                // Link para Cadastro
+                                
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
