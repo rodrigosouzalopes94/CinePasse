@@ -1,6 +1,6 @@
 
 
-import 'package:cine_passe_app/features/controllers/auth_controller.dart';
+import 'package:cine_passe_app/features/controllers/auth_viewmodel.dart';
 import 'package:cine_passe_app/features/controllers/theme_controller.dart';
 import 'package:cine_passe_app/features/pages/home_page.dart';
 import 'package:cine_passe_app/features/pages/plans_page.dart';
@@ -185,7 +185,7 @@ class _MainAppWrapperState extends State<MainAppWrapper> {
         
         onLogoutPress: () {
           
-          context.read<AuthController>().logout();
+          context.read<AuthViewModel>().logout();
         },
 
         isDarkMode: themeController.isDarkMode,

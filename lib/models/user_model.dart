@@ -1,13 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
-
-enum SubscriptionPlan {
-  none, 
-  premium,
-  familia,
-}
+enum SubscriptionPlan { none, premium, familia }
 
 class UserModel {
   final String? uid;
@@ -15,24 +8,22 @@ class UserModel {
   final String cpf;
   final String email;
   final int idade;
-  
+
   final String planoAtual;
   final Timestamp? planoVenceEm;
   final bool isAdmin;
 
-  
   const UserModel({
     this.uid,
     required this.nome,
     required this.cpf,
     required this.email,
     required this.idade,
-    this.planoAtual = 'Nenhum', 
+    this.planoAtual = 'Nenhum',
     this.planoVenceEm,
     this.isAdmin = false,
   });
 
-  
   UserModel copyWith({
     String? uid,
     String? nome,
@@ -55,22 +46,18 @@ class UserModel {
     );
   }
 
-  
   Map<String, dynamic> toMap() {
     return {
       'nome': nome,
       'cpf': cpf,
       'email': email,
       'idade': idade,
-      'planoAtual': planoAtual, 
+      'planoAtual': planoAtual,
       'planoVenceEm': planoVenceEm,
       'isAdmin': isAdmin,
-      
-      
     };
   }
 
-  
   factory UserModel.fromMap(Map<String, dynamic> data, String documentId) {
     return UserModel(
       uid: documentId,
@@ -79,11 +66,10 @@ class UserModel {
       email: data['email'] ?? '',
       idade:
           (data['idade'] is int
-                  ? data['idade']
-                  : int.tryParse(data['idade'].toString())) ??
-              0,
+              ? data['idade']
+              : int.tryParse(data['idade'].toString())) ??
+          0,
 
-      
       planoAtual: data['planoAtual'] ?? 'Nenhum',
       planoVenceEm: data['planoVenceEm'] as Timestamp?,
       isAdmin: data['isAdmin'] ?? false,

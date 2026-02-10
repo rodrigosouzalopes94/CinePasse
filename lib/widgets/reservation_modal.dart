@@ -1,14 +1,16 @@
-import 'dart:async';
-import 'package:cine_passe_app/features/controllers/reservation_controller.dart';
-import 'package:cine_passe_app/features/controllers/ticket_controller.dart';
-import 'package:cine_passe_app/features/services/reservation_service.dart';
-import 'package:cine_passe_app/models/movie_model.dart';
+import 'package:cine_passe_app/features/repositories/authrepositorie/i_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+// ViewModels e Repositories
+import 'package:cine_passe_app/features/controllers/reservation_viewmodel.dart';
+import 'package:cine_passe_app/features/controllers/ticket_viewmodel.dart';
+import 'package:cine_passe_app/features/controllers/auth_viewmodel.dart';
+import 'package:cine_passe_app/features/services/reservation_service.dart';
 
-
+// Models e Widgets
+import 'package:cine_passe_app/models/movie_model.dart';
 import 'package:cine_passe_app/widgets/custom_button.dart';
 
 class ReservationModal extends StatelessWidget {
@@ -16,13 +18,10 @@ class ReservationModal extends StatelessWidget {
 
   const ReservationModal({super.key, required this.movie});
 
-  
   void _showSuccessDialog(BuildContext context) {
-    
     showDialog(
       context: context,
-      
-      builder: (dialogContext) => AlertDialog( 
+      builder: (dialogContext) => AlertDialog(
         title: const Icon(Icons.check_circle, color: Colors.green, size: 60),
         content: const Text(
           'Solicitação de reserva enviada!\n\nSeu voucher está aguardando aprovação na aba "Meus Ingressos".',
@@ -30,10 +29,9 @@ class ReservationModal extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            
-            onPressed: () => Navigator.pop(dialogContext), 
-            child: const Text('OK')
-          )
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
@@ -43,79 +41,56 @@ class ReservationModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    
-    
+    // Pegamos o UID do usuário logado através da AuthViewModel global
+    final authViewModel = context.read<AuthViewModel>();
+    final userId = authViewModel.userProfile?.uid ?? '';
+
     return ChangeNotifierProvider(
-      create: (ctx) => ReservationController(
-        
-        
-        ReservationService(), 
-        ctx.read<TicketController>(),
-      )..initialize(), 
-      
-      child: Consumer<ReservationController>(
-        builder: (ctx, controller, child) {
-          
-          if (controller.isTimeout.value && Navigator.canPop(ctx)) {
-             
-             WidgetsBinding.instance.addPostFrameCallback((_) {
-               
-               Navigator.pop(ctx); 
-               
-               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text('Tempo de reserva esgotado.'), backgroundColor: Colors.red),
-               );
-             });
+      // CORREÇÃO: Chamada limpa do construtor da ViewModel
+      create: (ctx) => ReservationViewModel(
+        ReservationService(),
+        ctx.read<IAuthRepository>(), 
+        ctx.read<TicketViewModel>(),
+      )..initialize(userId),
+
+      child: Consumer<ReservationViewModel>(
+        builder: (ctx, viewModel, child) {
+          // Listener para fechar o modal em caso de timeout
+          if (viewModel.isTimeout.value && Navigator.canPop(ctx)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Tempo de reserva esgotado.'), backgroundColor: Colors.red),
+              );
+            });
           }
 
           return Container(
             padding: const EdgeInsets.all(24.0),
-            
             decoration: BoxDecoration(
               color: theme.scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 20,
-                  offset: const Offset(0, -5),
-                ),
-              ],
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  
-                  _buildTimerHeader(theme, controller),
+                  _buildTimerHeader(theme, viewModel),
+                  const SizedBox(height: 24),
+                  _buildMovieDetails(theme, viewModel),
                   const SizedBox(height: 24),
 
-                  _buildMovieDetails(theme, controller),
-
-                  const SizedBox(height: 24),
-
-                  
-                  if (controller.isLoadingProfile) 
-                    const Center(child: Padding(
-                      padding: EdgeInsets.all(40.0),
-                      child: CircularProgressIndicator(),
-                    ))
+                  if (viewModel.isLoadingProfile)
+                    const Center(child: Padding(padding: EdgeInsets.all(40.0), child: CircularProgressIndicator()))
                   else
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildTimeSelection(theme, controller),
-                        
+                        _buildTimeSelection(theme, viewModel),
                         const SizedBox(height: 32),
                         const Divider(),
                         const SizedBox(height: 16),
-
-                        
-                        _buildSummaryAndButton(theme, controller, ctx, movie), 
+                        _buildSummaryAndButton(theme, viewModel, ctx),
                       ],
                     ),
                 ],
@@ -127,199 +102,97 @@ class ReservationModal extends StatelessWidget {
     );
   }
 
-  
+  // --- Métodos Auxiliares de UI ---
 
-  Widget _buildTimerHeader(ThemeData theme, ReservationController controller) {
-    
+  Widget _buildTimerHeader(ThemeData theme, ReservationViewModel viewModel) {
     return ValueListenableBuilder<int>(
-      valueListenable: controller.remainingSeconds,
-      builder: (context, remainingSeconds, child) {
-        final String formattedTime = '${(remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(remainingSeconds % 60).toString().padLeft(2, '0')}';
-        final bool isCritical = remainingSeconds < 60;
-        
+      valueListenable: viewModel.remainingSeconds,
+      builder: (context, seconds, child) {
+        final String formattedTime =
+            '${(seconds ~/ 60).toString().padLeft(2, '0')}:${(seconds % 60).toString().padLeft(2, '0')}';
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Reserva de Ingresso', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey)),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: isCritical ? Colors.red.withOpacity(0.1) : theme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.timer_outlined, 
-                    size: 16, 
-                    color: isCritical ? Colors.red : theme.primaryColor
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    formattedTime,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Monospace',
-                      color: isCritical ? Colors.red : theme.primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const Text('Reserva de Ingresso', style: TextStyle(color: Colors.grey)),
+            Text(formattedTime, style: TextStyle(fontWeight: FontWeight.bold, color: theme.primaryColor)),
           ],
         );
       },
     );
   }
 
-  Widget _buildMovieDetails(ThemeData theme, ReservationController controller) {
-    final bool hasActivePlan = controller.hasActivePlan;
-    final String userPlan = controller.userPlan;
-    
+  Widget _buildMovieDetails(ThemeData theme, ReservationViewModel viewModel) {
+    final bool hasPlan = viewModel.hasActivePlan;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            movie.imagemUrl,
-            width: 80,
-            height: 120,
-            fit: BoxFit.cover,
-            errorBuilder: (_,__,___) => Container(width: 80, height: 120, color: Colors.grey),
-          ),
+          child: Image.network(movie.imagemUrl, width: 80, height: 120, fit: BoxFit.cover),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(movie.titulo, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, fontSize: 20), maxLines: 2, overflow: TextOverflow.ellipsis),
+              Text(movie.titulo, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text('CinePasse Center', style: theme.textTheme.bodySmall),
-                ],
-              ),
-              const SizedBox(height: 8),
-              
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: hasActivePlan ? Colors.purple.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                    color: hasActivePlan ? Colors.purple : Colors.grey,
-                  ),
-                ),
-                child: Text(
-                  hasActivePlan ? 'Benefício $userPlan' : 'Pagamento Avulso',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: hasActivePlan ? Colors.purple : Colors.grey,
-                  ),
-                ),
-              ),
+              Text(hasPlan ? 'Plano: ${viewModel.userProfile?.planoAtual}' : 'Pagamento Avulso',
+                  style: TextStyle(color: hasPlan ? Colors.purple : Colors.grey, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
       ],
     );
   }
-  
-  Widget _buildTimeSelection(ThemeData theme, ReservationController controller) {
+
+  Widget _buildTimeSelection(ThemeData theme, ReservationViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Horário da Sessão', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        const Text('Selecione o Horário', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
-          children: controller.sessionTimes.map((time) {
-            final isSelected = controller.selectedTime == time; 
+          children: viewModel.sessionTimes.map((time) {
+            final isSelected = viewModel.selectedTime == time;
             return ChoiceChip(
               label: Text(time),
               selected: isSelected,
-              onSelected: (selected) => controller.setSelectedTime(selected ? time : null),
+              onSelected: (selected) => viewModel.setSelectedTime(selected ? time : null),
               selectedColor: theme.colorScheme.primary,
-              backgroundColor: theme.cardColor,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
             );
           }).toList(),
         ),
       ],
     );
   }
-  
-  
-  Widget _buildSummaryAndButton(ThemeData theme, ReservationController controller, BuildContext context, MovieModel movie) {
-    final bool hasActivePlan = controller.hasActivePlan;
-    
+
+  Widget _buildSummaryAndButton(ThemeData theme, ReservationViewModel viewModel, BuildContext context) {
+    final bool hasPlan = viewModel.hasActivePlan;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(
-              hasActivePlan ? 'R\$ 0,00' : 'R\$ 25,00',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                color: hasActivePlan ? Colors.green : theme.textTheme.bodyLarge?.color,
-              ),
-            ),
+            Text(hasPlan ? 'R\$ 0,00' : 'R\$ 25,00', 
+                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: hasPlan ? Colors.green : null)),
           ],
         ),
-        
-        
-        if (hasActivePlan)
-          const Padding(
-            padding: EdgeInsets.only(top: 4),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text('Benefício aplicado: Ingresso Gratuito', style: TextStyle(color: Colors.green, fontSize: 12)),
-            ),
-          ),
-
         const SizedBox(height: 24),
-
-        
         CustomButton(
-          text: hasActivePlan ? 'CONFIRMAR RESERVA (R\$ 0,00)' : 'IR PARA PAGAMENTO (R\$ 25,00)',
-          
-          isLoading: controller.ticketController.isLoading, 
-          onPressed: controller.selectedTime == null 
-            ? null 
-            : () async {
-                
-                final success = await controller.handleReservation(movie.titulo);
-                
-                
-                if (success) {
-                  
-                  
-                  if (Navigator.canPop(context)) Navigator.pop(context); 
-                  
-                  
-                  _showSuccessDialog(context); 
-                } else if (context.mounted) {
-                  
-                  final errorMessage = controller.ticketController.errorMessage;
-                  
-                  ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(content: Text('Falha na Reserva: $errorMessage'), backgroundColor: Colors.red),
-                  );
-                }
-              },
+          text: hasPlan ? 'CONFIRMAR RESERVA (R\$ 0,00)' : 'IR PARA PAGAMENTO (R\$ 25,00)',
+          isLoading: viewModel.ticketViewModel.isLoading,
+          onPressed: viewModel.selectedTime == null
+              ? null
+              : () async {
+                  final success = await viewModel.handleReservation(movie.titulo);
+                  if (success && context.mounted) {
+                    Navigator.pop(context);
+                    _showSuccessDialog(context);
+                  }
+                },
         ),
       ],
     );

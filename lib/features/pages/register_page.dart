@@ -1,232 +1,190 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui'; 
+import 'package:cine_passe_app/features/controllers/registration_viewmodel.dart';
+import 'package:cine_passe_app/widgets/custom_button.dart';
+import 'package:cine_passe_app/widgets/custom_text_field.dart';
 
-
-import '../../../widgets/custom_button.dart';
-import '../../../widgets/custom_text_field.dart'; 
-
-
-import '../controllers/registration_controller.dart';
-
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
   @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final _formKey = GlobalKey<FormState>();
+  
+  // Controllers locais
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _cpfController = TextEditingController();
+  final _ageController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _cpfController.dispose();
+    _ageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final viewModel = context.read<RegistrationViewModel>();
+    
+    final success = await viewModel.register(
+      name: _nameController.text,
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      cpf: _cpfController.text,
+      age: int.tryParse(_ageController.text) ?? 0,
+    );
+
+    if (success && mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta criada! Faça login.'), backgroundColor: Colors.green),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    
-    final controller = context.watch<RegistrationController>();
-    
-    final reader = context.read<RegistrationController>();
-
-    final formKey = GlobalKey<FormState>();
-
-    
-    const String backgroundImageUrl = 'https://i.imgur.com/UftFEv9.png';
+    final viewModel = context.watch<RegistrationViewModel>();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    
     final panelBg = isDarkMode
         ? const Color(0xFF1C1C1C).withOpacity(0.75)
         : Colors.white.withOpacity(0.75);
 
     return Scaffold(
-      
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
-          
-          Positioned.fill(
-            child: Image.network(
-              backgroundImageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(color: Colors.black),
-            ),
-          ),
-
-          
-          Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.5)),
-          ),
-
-          
+          _buildBackground(),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
-              child: Container(
-                width: double.infinity,
-                constraints: const BoxConstraints(maxWidth: 400),
-                decoration: BoxDecoration(
-                  color: panelBg,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Form(
-                        key: formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            
-                            Text(
-                              'Criar Conta',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: primaryColor,
-                                  ),
-                            ),
-                            const SizedBox(height: 8.0),
-                            Text(
-                              'Preencha seus dados abaixo',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: isDarkMode
-                                    ? Colors.grey[300]
-                                    : Colors.grey[700],
-                              ),
-                            ),
-                            const SizedBox(height: 32.0),
-
-                            
-                            if (controller.errorMessage != null)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: Text(
-                                  controller.errorMessage!,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-
-                            
-                            CustomTextField(
-                              label: 'Nome Completo',
-                              icon: Icons.person_outline,
-                              onChanged: reader.setName,
-                              validator: controller.validateName,
-                            ),
-                            const SizedBox(height: 16.0),
-
-                            
-                            CustomTextField(
-                              label: 'Email',
-                              icon: Icons.email_outlined,
-                              keyboardType: TextInputType.emailAddress,
-                              onChanged: reader.setEmail,
-                              validator: controller.validateEmail,
-                            ),
-                            const SizedBox(height: 16.0),
-
-                            
-                            CustomTextField(
-                              label: 'Senha',
-                              icon: Icons.lock_outline,
-                              isPassword: true,
-                              onChanged: reader.setPassword,
-                              validator: controller.validatePassword,
-                            ),
-                            const SizedBox(height: 16.0),
-
-                            
-                            CustomTextField(
-                              label: 'CPF (apenas números)',
-                              icon: Icons.badge_outlined,
-                              keyboardType: TextInputType.number,
-                              onChanged: reader.setCpf,
-                              validator: controller.validateCpf,
-                            ),
-                            const SizedBox(height: 16.0),
-
-                            
-                            CustomTextField(
-                              label: 'Idade',
-                              icon: Icons.calendar_today_outlined,
-                              keyboardType: TextInputType.number,
-                              onChanged: (val) => reader.setAge(val),
-                              validator: controller.validateAge,
-                            ),
-                            const SizedBox(height: 32.0),
-
-                            
-                            CustomButton(
-                              text: 'CADASTRAR',
-                              isLoading: controller.isLoading,
-                              onPressed: controller.isLoading
-                                  ? null
-                                  : () async {
-                                      if (formKey.currentState!.validate()) {
-                                        final success = await reader
-                                            .registerUser();
-                                        if (success && context.mounted) {
-                                          
-                                          Navigator.of(context).pop();
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Conta criada com sucesso! Faça login.',
-                                              ),
-                                              backgroundColor: Colors.green,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
-                            ),
-
-                            const SizedBox(height: 20.0),
-
-                            
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Já tem uma conta?',
-                                  style: TextStyle(
-                                    color: isDarkMode
-                                        ? const Color(0xFFC4C4C4)
-                                        : const Color(0xFF6B7280),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: Text(
-                                    'Entrar',
-                                    style: TextStyle(color: primaryColor),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              child: _buildRegisterCard(panelBg, primaryColor, isDarkMode, viewModel),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRegisterCard(Color panelBg, Color primaryColor, bool isDarkMode, RegistrationViewModel viewModel) {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 400),
+      decoration: BoxDecoration(color: panelBg, borderRadius: BorderRadius.circular(20.0)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(primaryColor, isDarkMode),
+                  const SizedBox(height: 32.0),
+                  
+                  if (viewModel.errorMessage != null)
+                    _buildErrorBox(viewModel.errorMessage!),
+
+                  CustomTextField(
+                    label: 'Nome Completo',
+                    icon: Icons.person_outline,
+                    controller: _nameController,
+                    validator: (val) => val!.isEmpty ? 'Campo obrigatório' : null,
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  CustomTextField(
+                    label: 'Email',
+                    icon: Icons.email_outlined,
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (val) => !val!.contains('@') ? 'Email inválido' : null,
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  CustomTextField(
+                    label: 'Senha',
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                    controller: _passwordController,
+                    validator: (val) => val!.length < 6 ? 'Mínimo 6 caracteres' : null,
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  CustomTextField(
+                    label: 'CPF',
+                    icon: Icons.badge_outlined,
+                    controller: _cpfController,
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  CustomTextField(
+                    label: 'Idade',
+                    icon: Icons.calendar_today_outlined,
+                    controller: _ageController,
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 32.0),
+
+                  CustomButton(
+                    text: 'CADASTRAR',
+                    isLoading: viewModel.isLoading,
+                    onPressed: viewModel.isLoading ? null : _handleRegister,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  
+  Widget _buildBackground() {
+    return Stack(
+      children: [
+        Positioned.fill(child: Image.network('https://i.imgur.com/UftFEv9.png', fit: BoxFit.cover)),
+        Positioned.fill(child: Container(color: Colors.black.withOpacity(0.5))),
+      ],
+    );
+  }
+
+  Widget _buildHeader(Color primaryColor, bool isDarkMode) {
+    return Column(
+      children: [
+        Text('Criar Conta', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: primaryColor)),
+        Text('Preencha seus dados abaixo', style: TextStyle(color: isDarkMode ? Colors.grey[300] : Colors.grey[700])),
+      ],
+    );
+  }
+
+  Widget _buildErrorBox(String message) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Text(message, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
     );
   }
 }

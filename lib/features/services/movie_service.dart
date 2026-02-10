@@ -4,11 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class MovieService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  
-  
-  
-  
-  
   Stream<List<MovieModel>> getMoviesStream() {
     return _firestore
         .collection('filmes')

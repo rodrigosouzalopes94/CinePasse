@@ -1,4 +1,4 @@
-import 'package:cine_passe_app/features/controllers/auth_controller.dart';
+import 'package:cine_passe_app/features/controllers/auth_viewmodel.dart';
 import 'package:cine_passe_app/features/controllers/theme_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +27,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     
-    final authController = context.watch<AuthController>();
+    final authController = context.watch<AuthViewModel>();
     
     final isDarkMode = Provider.of<ThemeController>(context).isDarkMode;
 
@@ -159,7 +159,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 if (_formKey.currentState!.validate()) {
                                   
                                   final success = await context
-                                      .read<AuthController>()
+                                      .read<AuthViewModel>()
                                       .resetPassword(_emailController.text);
 
                                   

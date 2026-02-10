@@ -1,12 +1,18 @@
 import 'package:cine_passe_app/features/repositories/authrepositorie/i_auth_repository.dart';
+import 'package:cine_passe_app/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cine_passe_app/models/user_model.dart';
 
 
 class FirebaseAuthRepository implements IAuthRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+
+  FirebaseAuthRepository({
+    FirebaseAuth? auth,
+    FirebaseFirestore? firestore,
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Stream<UserModel?> get onAuthStateChanged {
@@ -18,7 +24,6 @@ class FirebaseAuthRepository implements IAuthRepository {
 
   @override
   Future<UserModel?> login(String email, String password) async {
-   
     final credential = await _auth.signInWithEmailAndPassword(
       email: email.trim(),
       password: password,
@@ -31,33 +36,25 @@ class FirebaseAuthRepository implements IAuthRepository {
   }
 
   @override
+  Future<UserModel?> fetchUserProfile(String uid) async {
+    final doc = await _firestore.collection('users').doc(uid).get();
+    if (doc.exists) {
+      return UserModel.fromMap(doc.data()!, doc.id);
+    }
+    return null;
+  }
+
+  @override
   Future<UserModel?> register(UserModel user, String password) async {
-    
     final credential = await _auth.createUserWithEmailAndPassword(
       email: user.email.trim(),
       password: password,
     );
 
     if (credential.user != null) {
-      
       final newUser = user.copyWith(uid: credential.user!.uid);
-
-    
-      await _firestore
-          .collection('users')
-          .doc(newUser.uid)
-          .set(newUser.toMap());
-
+      await _firestore.collection('users').doc(newUser.uid).set(newUser.toMap());
       return newUser;
-    }
-    return null;
-  }
-
-  @override
-  Future<UserModel?> fetchUserProfile(String uid) async {
-    final doc = await _firestore.collection('users').doc(uid).get();
-    if (doc.exists && doc.data() != null) {
-      return UserModel.fromMap(doc.data()!, doc.id);
     }
     return null;
   }
@@ -72,15 +69,15 @@ class FirebaseAuthRepository implements IAuthRepository {
     if (user == null) throw Exception("Usuário não autenticado");
 
     
-    await Future.wait([
-      user.updateDisplayName(newName),
-      _firestore.collection('users').doc(user.uid).update({
-        'nome': newName,
-        'idade': newAge,
-        if (newPlan != null) 'planoAtual': newPlan,
-      }),
-    ]);
+    await user.updateDisplayName(newName);
     await user.reload();
+
+    
+    await _firestore.collection('users').doc(user.uid).update({
+      'nome': newName,
+      'idade': newAge,
+      if (newPlan != null) 'planoAtual': newPlan,
+    });
   }
 
   @override
