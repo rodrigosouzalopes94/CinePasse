@@ -15,7 +15,7 @@ class TicketViewModel with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
-  /// Fluxo de Reserva com integração de lógica de negócio
+  
   Future<bool> reserveTicket({
     required String userId,
     required String movieTitle,

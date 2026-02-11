@@ -1,4 +1,4 @@
-import 'package:cine_passe_app/features/repositories/authrepositorie/i_auth_repository.dart';
+import 'package:cine_passe_app/features/repositories/authrepository/i_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:cine_passe_app/features/services/reservation_service.dart';
 import 'package:cine_passe_app/features/controllers/ticket_viewmodel.dart';
@@ -6,7 +6,7 @@ import 'package:cine_passe_app/models/user_model.dart';
 
 class ReservationViewModel with ChangeNotifier {
   final ReservationService _reservationService;
-  final IAuthRepository _authRepository; 
+  final IAuthRepository _authRepository;
   final TicketViewModel _ticketViewModel;
 
   ReservationViewModel(
@@ -25,11 +25,10 @@ class ReservationViewModel with ChangeNotifier {
   String? get selectedTime => _selectedTime;
   UserModel? get userProfile => _userProfile;
   TicketViewModel get ticketViewModel => _ticketViewModel;
-  
   ValueNotifier<int> get remainingSeconds => _reservationService.remainingSeconds;
   ValueNotifier<bool> get isTimeout => _reservationService.isTimeout;
 
-  bool get hasActivePlan => 
+  bool get hasActivePlan =>
       _userProfile?.planoAtual != 'Nenhum' && _userProfile?.planoAtual != null;
 
   void initialize(String uid) {
@@ -40,10 +39,7 @@ class ReservationViewModel with ChangeNotifier {
   Future<void> _loadUserProfile(String uid) async {
     _isLoadingProfile = true;
     notifyListeners();
-    
- 
     _userProfile = await _authRepository.fetchUserProfile(uid);
-    
     _isLoadingProfile = false;
     notifyListeners();
   }
@@ -53,20 +49,47 @@ class ReservationViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> handleReservation(String movieTitle) async {
+  
+  Future<bool> handleReservationFlow(BuildContext context, String movieTitle) async {
     if (_selectedTime == null || _userProfile == null) return false;
 
-    _reservationService.cancelTimer();
+    
+    if (hasActivePlan) {
+      return await _executeReservation(movieTitle, 'Plano Assinatura');
+    }
 
-   
-    final String ticketType = hasActivePlan ? 'Plano Assinatura' : 'Reserva Normal';
+    
+    else {
+      final result = await Navigator.pushNamed(
+        context,
+        '/checkout',
+        arguments: {
+          'amount': 25.0,
+          'movieTitle': movieTitle,
+          'sessionTime': _selectedTime,
+        },
+      );
+
+      
+      if (result == true) {
+        return await _executeReservation(movieTitle, 'Reserva Normal');
+      }
+      return false;
+    }
+  }
+
+ 
+  Future<bool> _executeReservation(String movieTitle, String type) async {
+    
+    final String userId = _userProfile?.uid ?? '';
+    if (userId.isEmpty) return false;
 
     return await _ticketViewModel.reserveTicket(
-      userId: _userProfile!.uid as String,
+      userId: userId, 
       movieTitle: movieTitle,
       sessionDate: DateTime.now(),
       sessionTime: _selectedTime!,
-      ticketType: ticketType,
+      ticketType: type,
     );
   }
 

@@ -5,7 +5,7 @@ class PlanModel {
   final double preco;
   final List<String> beneficios;
   final bool isPopular;
-  final int maxMembros; 
+  final int maxMembros;
 
   const PlanModel({
     required this.id,
@@ -17,9 +17,30 @@ class PlanModel {
     this.maxMembros = 1,
   });
 
-  
-  
-  
+  factory PlanModel.fromMap(Map<String, dynamic> map) {
+    return PlanModel(
+      id: map['id'] ?? '',
+      nome: map['nome'] ?? '',
+      descricao: map['descricao'] ?? '',
+      preco: (map['preco'] as num?)?.toDouble() ?? 0.0,
+      beneficios: List<String>.from(map['beneficios'] ?? []),
+      isPopular: map['isPopular'] ?? false,
+      maxMembros: map['maxMembros'] ?? 1,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nome': nome,
+      'descricao': descricao,
+      'preco': preco,
+      'beneficios': beneficios,
+      'isPopular': isPopular,
+      'maxMembros': maxMembros,
+    };
+  }
+
   static const List<PlanModel> list = [
     PlanModel(
       id: 'premium',

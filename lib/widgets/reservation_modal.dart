@@ -1,15 +1,13 @@
-import 'package:cine_passe_app/features/repositories/authrepositorie/i_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-// ViewModels e Repositories
 import 'package:cine_passe_app/features/controllers/reservation_viewmodel.dart';
 import 'package:cine_passe_app/features/controllers/ticket_viewmodel.dart';
 import 'package:cine_passe_app/features/controllers/auth_viewmodel.dart';
+import 'package:cine_passe_app/features/repositories/authrepository/i_auth_repository.dart';
 import 'package:cine_passe_app/features/services/reservation_service.dart';
 
-// Models e Widgets
+
 import 'package:cine_passe_app/models/movie_model.dart';
 import 'package:cine_passe_app/widgets/custom_button.dart';
 
@@ -40,22 +38,18 @@ class ReservationModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    // Pegamos o UID do usuário logado através da AuthViewModel global
     final authViewModel = context.read<AuthViewModel>();
     final userId = authViewModel.userProfile?.uid ?? '';
 
     return ChangeNotifierProvider(
-      // CORREÇÃO: Chamada limpa do construtor da ViewModel
       create: (ctx) => ReservationViewModel(
         ReservationService(),
-        ctx.read<IAuthRepository>(), 
+        ctx.read<IAuthRepository>(),
         ctx.read<TicketViewModel>(),
       )..initialize(userId),
-
       child: Consumer<ReservationViewModel>(
         builder: (ctx, viewModel, child) {
-          // Listener para fechar o modal em caso de timeout
+          
           if (viewModel.isTimeout.value && Navigator.canPop(ctx)) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pop(ctx);
@@ -80,7 +74,6 @@ class ReservationModal extends StatelessWidget {
                   const SizedBox(height: 24),
                   _buildMovieDetails(theme, viewModel),
                   const SizedBox(height: 24),
-
                   if (viewModel.isLoadingProfile)
                     const Center(child: Padding(padding: EdgeInsets.all(40.0), child: CircularProgressIndicator()))
                   else
@@ -102,7 +95,7 @@ class ReservationModal extends StatelessWidget {
     );
   }
 
-  // --- Métodos Auxiliares de UI ---
+  
 
   Widget _buildTimerHeader(ThemeData theme, ReservationViewModel viewModel) {
     return ValueListenableBuilder<int>(
@@ -136,7 +129,7 @@ class ReservationModal extends StatelessWidget {
             children: [
               Text(movie.titulo, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text(hasPlan ? 'Plano: ${viewModel.userProfile?.planoAtual}' : 'Pagamento Avulso',
+              Text(hasPlan ? 'Plano Ativo: ${viewModel.userProfile?.planoAtual}' : 'Pagamento Avulso',
                   style: TextStyle(color: hasPlan ? Colors.purple : Colors.grey, fontWeight: FontWeight.bold)),
             ],
           ),
@@ -149,7 +142,7 @@ class ReservationModal extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Selecione o Horário', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text('Horário da Sessão', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
@@ -169,6 +162,7 @@ class ReservationModal extends StatelessWidget {
 
   Widget _buildSummaryAndButton(ThemeData theme, ReservationViewModel viewModel, BuildContext context) {
     final bool hasPlan = viewModel.hasActivePlan;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -182,14 +176,18 @@ class ReservationModal extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         CustomButton(
-          text: hasPlan ? 'CONFIRMAR RESERVA (R\$ 0,00)' : 'IR PARA PAGAMENTO (R\$ 25,00)',
+          // O texto muda para deixar claro o próximo passo
+          text: hasPlan ? 'CONFIRMAR RESERVA' : 'IR PARA PAGAMENTO',
           isLoading: viewModel.ticketViewModel.isLoading,
           onPressed: viewModel.selectedTime == null
               ? null
               : () async {
-                  final success = await viewModel.handleReservation(movie.titulo);
+                  
+                  final success = await viewModel.handleReservationFlow(context, movie.titulo);
+                  
                   if (success && context.mounted) {
-                    Navigator.pop(context);
+                    
+                    if (Navigator.canPop(context)) Navigator.pop(context);
                     _showSuccessDialog(context);
                   }
                 },

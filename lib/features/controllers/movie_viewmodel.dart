@@ -1,4 +1,4 @@
-import 'package:cine_passe_app/features/repositories/movierepositorie/i_movie_repository.dart';
+import 'package:cine_passe_app/features/repositories/movierepository/i_movie_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:cine_passe_app/models/movie_model.dart';
 

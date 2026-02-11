@@ -1,4 +1,4 @@
-import 'package:cine_passe_app/features/repositories/authrepositorie/i_auth_repository.dart';
+import 'package:cine_passe_app/features/repositories/authrepository/i_auth_repository.dart';
 import 'package:cine_passe_app/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

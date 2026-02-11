@@ -1,4 +1,4 @@
-import 'package:cine_passe_app/features/repositories/authrepositorie/i_auth_repository.dart';
+import 'package:cine_passe_app/features/repositories/authrepository/i_auth_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:cine_passe_app/features/controllers/auth_viewmodel.dart';

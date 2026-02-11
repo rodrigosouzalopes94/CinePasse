@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:cine_passe_app/features/repositories/movierepositorie/i_movie_repository.dart';
+import 'package:cine_passe_app/features/repositories/movierepository/i_movie_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:cine_passe_app/features/controllers/movie_viewmodel.dart';
