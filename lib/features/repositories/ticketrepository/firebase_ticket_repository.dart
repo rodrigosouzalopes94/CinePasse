@@ -21,4 +21,25 @@ class FirebaseTicketRepository implements ITicketRepository {
             .map((doc) => TicketModel.fromMap(doc.data(), doc.id))
             .toList());
   }
+
+
+  @override
+  Future<int> getActiveTicketsCount({
+    required String userId,
+    required String movieTitle,
+    required String sessionTime,
+  }) async {
+    
+    final query = await _firestore
+        .collection('tickets')
+        .where('usuarioId', isEqualTo: userId)
+        .where('filmeTitulo', isEqualTo: movieTitle)
+        .where('sessaoHorario', isEqualTo: sessionTime)
+        
+        .where('status', whereIn: ['Pendente', 'Confirmado'])
+        .count() 
+        .get();
+
+    return query.count ?? 0;
+  }
 }

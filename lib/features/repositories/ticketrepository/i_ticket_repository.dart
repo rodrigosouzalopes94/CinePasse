@@ -6,4 +6,11 @@ abstract class ITicketRepository {
 
   
   Stream<List<TicketModel>> getUserTicketsStream(String userId);
+
+ 
+  Future<int> getActiveTicketsCount({
+    required String userId,
+    required String movieTitle,
+    required String sessionTime,
+  });
 }

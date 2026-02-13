@@ -7,6 +7,8 @@ class TicketViewModel with ChangeNotifier {
 
   TicketViewModel(this._repository);
 
+  ITicketRepository get repository => _repository;
+
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;

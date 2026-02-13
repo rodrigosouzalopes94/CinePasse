@@ -77,4 +77,10 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() => toMap();
+
+  int get maxTicketsPerSession {
+    if (planoAtual == 'Família') return 4;
+    if (planoAtual == 'Passe Premium') return 1;
+    return 99;
+  }
 }

@@ -1,3 +1,6 @@
+import 'package:cine_passe_app/features/pages/checkout_page.dart';
+import 'package:cine_passe_app/features/repositories/paymentrepository/i_payment_repository.dart';
+import 'package:cine_passe_app/features/repositories/paymentrepository/stripe_payment_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,7 +13,7 @@ import 'package:cine_passe_app/features/repositories/movierepository/firebase_mo
 import 'package:cine_passe_app/features/repositories/ticketrepository/firebase_ticket_repository.dart';
 import 'package:cine_passe_app/features/repositories/planrepository/i_plan_repository.dart';
 import 'package:cine_passe_app/features/repositories/planrepository/firebase_plan_repository.dart';
-import 'package:cine_passe_app/features/services/payment_service.dart';
+
 
 
 import 'package:cine_passe_app/features/controllers/auth_viewmodel.dart'; 
@@ -36,17 +39,17 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        
+       
         Provider<IAuthRepository>(create: (_) => FirebaseAuthRepository()),
         Provider<IPlanRepository>(create: (_) => FirebasePlanRepository()),
         
-      
-        Provider<PaymentService>(create: (_) => PaymentService()),
+        
+        Provider<IPaymentRepository>(create: (_) => StripePaymentRepository()),
 
         
         ChangeNotifierProvider(create: (_) => ThemeController()),
         
-        
+       
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(context.read<IAuthRepository>()),
         ),
@@ -63,10 +66,10 @@ void main() async {
           create: (_) => TicketViewModel(FirebaseTicketRepository()),
         ),
 
-       
+        
         ChangeNotifierProvider(
           create: (context) => PaymentViewModel(
-            paymentService: context.read<PaymentService>(),
+            paymentRepo: context.read<IPaymentRepository>(),
             planRepository: context.read<IPlanRepository>(),
           ),
         ),
@@ -93,6 +96,21 @@ class CinePasseApp extends StatelessWidget {
       darkTheme: kDarkTheme,
       themeMode: themeController.themeMode,
       locale: const Locale('pt', 'BR'),
+      
+      onGenerateRoute: (settings) {
+        if (settings.name == '/checkout') {
+          
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => CheckoutPage(
+              plan: args?['plan'],
+              manualAmount: args?['amount'],
+            ),
+          );
+        }
+        return null; 
+      },
+
       home: authViewModel.isLoggedIn
           ? const MainAppWrapper()
           : const LoginPage(),
